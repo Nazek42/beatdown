@@ -75,12 +75,12 @@ public class BeatFile {
                                   float.Parse(ev.Groups[2].Value));
     }
 
-    public static string Remove(string input, string regex)
+    private static string Remove(string input, string regex)
     {
         return Regex.Replace(input, regex, "");
     }
 
-    public static string Remove(string input, string regex, RegexOptions options)
+    private static string Remove(string input, string regex, RegexOptions options)
     {
         return Regex.Replace(input, regex, "", options);
     }
