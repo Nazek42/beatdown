@@ -863,8 +863,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1065726948}
-  - component: {fileID: 1065726947}
   - component: {fileID: 1065726946}
+  - component: {fileID: 1065726947}
   m_Layer: 0
   m_Name: AudioController
   m_TagString: Untagged
@@ -886,6 +886,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   path: Xepher
   simfileName: Xepher.sm
+  beatMultiplierLog: 0
   boards:
   - {fileID: 1445156075}
   - {fileID: 589869741}

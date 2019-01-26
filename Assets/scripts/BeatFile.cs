@@ -80,6 +80,7 @@ public class BeatFile {
         string[][] measures = notesTag.Split(new[] { ',' })
                                       .Select(measure => measure.Split(new[] { System.Environment.NewLine }, System.StringSplitOptions.None)
                                                                 .Select(line => Remove(line, @"\s+"))
+                                                                .Where(line => line.Length != 0)
                                                                 .ToArray())
                                       .ToArray();
 
@@ -91,13 +92,13 @@ public class BeatFile {
             {
                 string line = measure[b];
                 //Debug.Log("Line of length " + line.Length + ": \"" + line + '"');
-                //Debug.Log("Full measure: \"" + measure + '"');  
+                Debug.Log("Full measure: \"" + measure + '"');  
                 for (int col = 0; col < line.Length; col++)
                 {
                     if (line[col] != '0')
                     {
                         double beat = (m + b / (double) divs) * 4;
-                        //Debug.Log("measure " + m + ", sub-beat " + b + ", output beat = " + beat);
+                        //Debug.Log("measure " + m + ", sub-beat " + b + ", subdivisions = " + divs + ", output beat = " + beat);
                         notes.Add(new NoteData(beat, directionMap[col]));
                     }
                 }

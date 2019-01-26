@@ -25,6 +25,9 @@ public class AudioPlayer : MonoBehaviour {
     public string path;
     public string simfileName;
 
+    public int beatMultiplierLog;
+    public double beatMultiplier { get; private set; }
+
     [SerializeField] private NoteController[] boards;
     
     public BeatLerper beatLerper { get; private set; }
@@ -45,18 +48,13 @@ public class AudioPlayer : MonoBehaviour {
     void Start()
     {
         audio_source = GetComponent<AudioSource>();
-        /*
-        System.IO.File.WriteAllLines("beats.txt",
-            Enumerable.Range(1, 300 * 32)
-                .Select(t => beatLerper.TimeFromBeat((double)t / 32).ToString())
-                .ToArray());
-        */
         song = BeatFile.ReadStepfile("Assets/Resources/music/" + path + "/" + simfileName);
         string audio_path = "music/" + path + "/" + System.IO.Path.GetFileNameWithoutExtension(song.metadata["MUSIC"]);
         Debug.Log(audio_path);
         audio_source.clip = Resources.Load<AudioClip>(audio_path);
         beatLerper = new BeatLerper(song.bpmEvents, song.offset);
         notes_iter = song.notes.OrderBy(note => note.beat);
+        beatMultiplier = System.Math.Pow(2, beatMultiplierLog);
         //onBeat += SpawnNotes;
         //onBeat += AnimateLines;
         ready = true;
@@ -86,38 +84,14 @@ public class AudioPlayer : MonoBehaviour {
         if (playing && SongTime() > song.offset)
         {
             double new_beat = SongBeat();
-            if (System.Math.Truncate(new_beat) != System.Math.Truncate(old_beat) && onBeat != null)
+            if (onBeat != null && System.Math.Truncate(new_beat * beatMultiplier) != System.Math.Truncate(old_beat * beatMultiplier))
             {
                 onBeat(new_beat);
             }
             old_beat = new_beat;
         }
     }
-    /*
-    private void SpawnNotes(double current_beat)
-    {
-        //Debug.Log("hello from SpawnNotes");
-        foreach (NoteData note in notes_iter.Where(note => (beatLerper.TimeFromBeat(note.beat) - SongTime()) < (note_time + note_pre_time)))
-        {
-            //Debug.Log("spawning note for beat " + note.beat);
-            Instantiate(note_prefab).Initialize(GetComponent<AudioPlayer>(), note.beat, note.direction);
-        }
-    }
-
-    private void AnimateLines(double _)
-    {
-        StartCoroutine(LineBulge());
-    }
-
-    private IEnumerator LineBulge()
-    {
-        topLine.widthMultiplier = .15f;
-        bottomLine.widthMultiplier = .15f;
-        yield return new WaitForSeconds(0.1f);
-        topLine.widthMultiplier = .1f;
-        bottomLine.widthMultiplier = .1f;
-    }
-    */
+    
     public double SongTime ()
     {
         return AudioSettings.dspTime - song_start_time;
@@ -126,6 +100,11 @@ public class AudioPlayer : MonoBehaviour {
     public double SongBeat()
     {
         return beatLerper.BeatFromTime(SongTime());
+    }
+
+    public double TimeUntilBeat(double beat)
+    {
+        return beatLerper.TimeFromBeat(beat) - SongTime();
     }
 }
 

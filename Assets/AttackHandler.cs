@@ -64,7 +64,7 @@ public class AttackHandler : MonoBehaviour
 
     public void SetAttack(Player player, BeatInput.Attack attack)
     {
-        Debug.Log(player.ToString() + " " + attack.ToString());
+        //Debug.Log(player.ToString() + " " + attack.ToString());
         switch(player)
         {
             case Player.Player1:

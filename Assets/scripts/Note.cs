@@ -29,16 +29,11 @@ public class Note : MonoBehaviour {
 
         renderer.sprite = DoubleIsInteger(beat) ? quarterSprite : eighthSprite;
         transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 90 * (int)type));
-        if(!DoubleIsInteger(b))
-        {
-            Debug.Log("wtf");
-            Destroy(gameObject);
-        }
     }
 
     public static bool DoubleIsInteger(double x)
     {
-        return (x - System.Math.Truncate(x)) < double.Epsilon;
+        return (x - System.Math.Truncate(x)) < float.Epsilon;
     }
 
 	// Update is called once per frame
@@ -46,6 +41,7 @@ public class Note : MonoBehaviour {
         double until = audioPlayer.beatLerper.TimeFromBeat(beat) - audioPlayer.SongTime();
         if (until < 0)
         {
+            Debug.Log("Note destroying self");
             Destroy(gameObject);
             return;
         }
