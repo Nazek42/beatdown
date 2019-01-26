@@ -27,6 +27,10 @@ public class Note : MonoBehaviour {
 
         renderer.sprite = DoubleIsInteger(beat) ? quarterSprite : eighthSprite;
         transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 90 * (int)type));
+        if(!DoubleIsInteger(b))
+        {
+            Destroy(gameObject);
+        }
     }
 
     public static bool DoubleIsInteger(double x)

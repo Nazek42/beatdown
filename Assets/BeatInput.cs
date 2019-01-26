@@ -6,56 +6,75 @@ using UnityEngine;
 
 public class BeatInput : MonoBehaviour
 {
-    double beatAccum = 0;
-    public double bpm = 165;
     public double inputLatency;
-    public double songLatency;
-    double timePerBeat;
-    double chordWindow;
+    public double chordWindow;
 
-    int beat = 0;
-
-    float upState = 0.0F;
-    float downState = 0.0F;
-    float leftState = 0.0F;
-    float rightState = 0.0F;
+    public string upButton;
+    public string downButton;
+    public string leftButton;
+    public string rightButton;
 
 
-    AudioSource audioSource;
-    public AudioClip sound;
-    public AudioClip music;
+    public AudioPlayer controller;
 
     private Attack attack;
-
     private InputEvent lastInput;
 
     // Start is called before the first frame update
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
-        audioSource.clip = music;
-        audioSource.Play();
         attack = Attack.None;
-        timePerBeat = 60.0 / bpm;
-        chordWindow = timePerBeat;
-        lastInput = new InputEvent(InputType.None, timePerBeat);
-        last = AudioSettings.dspTime;
+        //chordWindow = timePerBeat;
+        lastInput = new InputEvent(InputType.None, AudioSettings.dspTime);
 
-        songLatency *= -1;
-
+        controller.onBeat += Beat;
     }
-    double last;
+
+    void Beat(double beatNum)
+    {
+        // Get current time
+        double curTime = AudioSettings.dspTime;
+        // Get offset
+        double offset = curTime - lastInput.time;
+        //beatAccum -= timePerBeat;
+        // audioSource.PlayOneShot(sound);
+        if(attack == Attack.None)
+        {
+            switch (lastInput.input)
+            {
+                case InputType.Down:
+                    attack = Attack.Down;
+                    break;
+                case InputType.Up:
+                    attack = Attack.Up;
+                    break;
+                case InputType.Left:
+                    attack = Attack.Left;
+                    break;
+                case InputType.Right:
+                    attack = Attack.Right;
+                    break;
+                default:
+                    break;
+            }
+        }
+        // Print out the attack
+        //Debug.Log(attack);
+        //lastInput.timeUntilBeat += inputLatency;
+        GetComponent<TextMesh>().text = Mathf.RoundToInt((float)beatNum).ToString() + " " + attack.ToString() + " " + OffsetToCheer(offset).ToString();// + " " + TimeToName(attack, lastInput.timeUntilBeat) + " " + lastInput.timeUntilBeat.ToString();
+        //Debug.Log(lastInput.input);
+        //Debug.Log(lastInput.timeUntilBeat);
+        // Reset the attack and input stack
+        attack = Attack.None;
+        lastInput.input = InputType.None;
+        lastInput.time = AudioSettings.dspTime;
+    }
     // Update is called once per frame
     void Update()
     {
-        if(audioSource.time < songLatency)
-        {
-            GetComponent<TextMesh>().text = "waiting for song";
-            return;
-        }
         // Update state of each step
-        beatAccum += ((AudioSettings.dspTime)- last);
-        last = (AudioSettings.dspTime);
+        //beatAccum += ((AudioSettings.dspTime)- last);
+        //last = (AudioSettings.dspTime);
         // If attack has been determined, don't bother checking inputs
         if (attack == Attack.None)
         {
@@ -63,12 +82,12 @@ public class BeatInput : MonoBehaviour
             if (lastInput.input != InputType.None)
             {
                 // Get current time to beat
-                double timeUntilBeat = timePerBeat - beatAccum;
+                //double timeUntilBeat = timePerBeat - beatAccum;
                 // Determine how far current time to beat is from the last input
-                double timeSinceInput = timeUntilBeat - lastInput.timeUntilBeat;
+               //double timeSinceInput = timeUntilBeat - lastInput.timeUntilBeat;
                 // Determine if this time is too long
 
-                if (timeSinceInput > chordWindow || beatAccum >= timePerBeat)
+                /*if (timeSinceInput > chordWindow || beatAccum >= timePerBeat)
                 {
                     switch (lastInput.input)
                     {
@@ -87,7 +106,7 @@ public class BeatInput : MonoBehaviour
                         default:
                             break;
                     }
-                }
+                }*/
             }
             //else {
                 // Check inputs
@@ -95,11 +114,12 @@ public class BeatInput : MonoBehaviour
                 //bool down = Input.GetKeyDown(KeyCode.DownArrow);
                 //bool left = Input.GetKeyDown(KeyCode.LeftArrow);
                 //bool right = Input.GetKeyDown(KeyCode.RightArrow);
-                bool up = Input.GetButtonDown("Up");
-                bool down = Input.GetButtonDown("Down");
-                bool left = Input.GetButtonDown("Left");
-                bool right = Input.GetButtonDown("Right");
-
+                bool up = Input.GetButtonDown(upButton);
+                bool down = Input.GetButtonDown(downButton);
+                bool left = Input.GetButtonDown(leftButton);
+                bool right = Input.GetButtonDown(rightButton);
+                
+           
 
                 // Check if we can just set the input
                 if (lastInput.input == InputType.None)
@@ -107,25 +127,25 @@ public class BeatInput : MonoBehaviour
                     if (up)
                     {
                         lastInput.input = InputType.Up;
-                        lastInput.timeUntilBeat = timePerBeat - beatAccum;
+                        lastInput.time = AudioSettings.dspTime;
                         up = false;
                     }
                     else if (down)
                     {
                         lastInput.input = InputType.Down;
-                        lastInput.timeUntilBeat = timePerBeat - beatAccum;
+                        lastInput.time = AudioSettings.dspTime;
                         down = false;
                     }
                     else if (left)
                     {
                         lastInput.input = InputType.Left;
-                        lastInput.timeUntilBeat = timePerBeat - beatAccum;
+                        lastInput.time = AudioSettings.dspTime;
                         left = false;
                     }
                     else if (right)
                     {
                         lastInput.input = InputType.Right;
-                        lastInput.timeUntilBeat = timePerBeat - beatAccum;
+                        lastInput.time = AudioSettings.dspTime;
                         right = false;
                     }
                 }
@@ -190,62 +210,14 @@ public class BeatInput : MonoBehaviour
                         attack = Attack.DownRight;
                     }
                 }
-            //}
         }
         else
         {
             Debug.Log("Attack determined, not bothering");
         }
-        if (beatAccum >= timePerBeat)
-        {
-            beatAccum -= timePerBeat;
-           // audioSource.PlayOneShot(sound);
 
-            // Print out the attack
-            //Debug.Log(attack);
-            beat += 1;
-            lastInput.timeUntilBeat += inputLatency;
-            GetComponent<TextMesh>().text = beat.ToString() + " " + attack.ToString() + " " + TimeToName(attack, lastInput.timeUntilBeat) + " " + lastInput.timeUntilBeat.ToString();
-            //Debug.Log(lastInput.input);
-            //Debug.Log(lastInput.timeUntilBeat);
-            // Reset the attack and input stack
-            attack = Attack.None;
-            lastInput.input = InputType.None;
-            lastInput.timeUntilBeat = timePerBeat;
-        }
     }
 
-    string TimeToName(Attack attack, double time)
-    {
-        if(attack == Attack.None)
-        {
-            return "Miss";
-        }
-        if(time < 0)
-        {
-            return "Bad";
-        }
-        if(time < timePerBeat * 0.05)
-        {
-            return "Marvelous";
-        }
-        else if(time < timePerBeat * 0.10)
-        {
-            return "Perfect";
-        }
-        else if(time < timePerBeat * 0.20)
-        {
-            return "Great";
-        }
-        else if(time < timePerBeat * 0.40)
-        {
-            return "Good";
-        }
-        else
-        {
-            return "Bad";
-        }
-    }
     private enum Attack
     {
         None,
@@ -271,12 +243,37 @@ public class BeatInput : MonoBehaviour
     private struct InputEvent
     {
         public InputType input;
-        public double timeUntilBeat;
+        public double time;
 
-        public InputEvent(InputType input, double timeUntilBeat)
+        public InputEvent(InputType input, double time)
         {
             this.input = input;
-            this.timeUntilBeat = timeUntilBeat;
+            this.time = time;
+        }
+    }
+
+    private string OffsetToCheer(double offset)
+    {
+        offset /= 2;
+        if(offset < 0.01666666)
+        {
+            return "Marvelous";
+        }
+        else if(offset < 0.033333)
+        {
+            return "Perfect";
+        }
+        else if(offset < 0.092)
+        {
+            return "Great";
+        }
+        else if(offset < 0.142)
+        {
+            return "Good";
+        }
+        else
+        {
+            return "Bad";
         }
     }
 }
