@@ -18,12 +18,12 @@ public class Song
 }
 
 public class BeatFile {
-    private static readonly Dictionary<char, NoteType> directionMap = new Dictionary<char, NoteType>()
+    private static readonly NoteType[] directionMap = new[]
     {
-        {'<', NoteType.left},
-        {'v', NoteType.down},
-        {'^', NoteType.up},
-        {'>', NoteType.right}
+        NoteType.left,
+        NoteType.down,
+        NoteType.up,
+        NoteType.right
     };
 
     public static Song ParseStepfile(string smtext)
@@ -48,6 +48,8 @@ public class BeatFile {
 
         song.bpmEvents = ParseBPMsAndStops(tags["BPMS"], tags["STOPS"]).OrderBy(ev => ev.beat).ToArray();
 
+        song.notes = ParseNotes(tags["NOTES"]);
+
         return song;
     }
 
@@ -64,9 +66,40 @@ public class BeatFile {
         events = Regex.Matches(bpmTag, @"([0-9.]+)=([0-9.]+)").Cast<Match>().Select(match => ParseBPMEvent(match, BPMEventType.BPMChange));
 
         stopTag = Remove(stopTag, @"\s+");
-        events = events.Concat(Regex.Matches(stopTag, @"([0-9.]+)=([0-9.]+)").Cast<Match>().Select(match => ParseBPMEvent(match, BPMEventType.BPMChange));
+        events = events.Concat(Regex.Matches(stopTag, @"([0-9.]+)=([0-9.]+)")
+                               .Cast<Match>()
+                               .Select(match => ParseBPMEvent(match, BPMEventType.Stop)));
 
         return events;
+    }
+
+    private static NoteData[] ParseNotes(string notesTag)
+    {
+        var notes = new List<NoteData>();
+        notesTag = Remove(notesTag, @".*\:", RegexOptions.Multiline);
+        string[][] measures = notesTag.Split(new[] { ',' })
+                                                 .Select(measure => measure.Split(new[] { System.Environment.NewLine }, System.StringSplitOptions.None)).ToArray();
+
+        for (int m = 0; m < measures.Length; m++)
+        {
+            string[] measure = measures[m];
+            int divs = measure.Length;
+            for (int b = 0; b < divs; b++)
+            {
+                string line = measure[b];
+                Debug.Log(line.Length + line);
+                Debug.Log(measure);
+                for (int col = 0; col < line.Length; col++)
+                {
+                    if (line[col] != '0')
+                    {
+                        notes.Add(new NoteData((m + b/divs) * 4, directionMap[col]));
+                    }
+                }
+            }
+        }
+
+        return notes.ToArray();
     }
 
     private static BPMEvent ParseBPMEvent(Match ev, BPMEventType type)

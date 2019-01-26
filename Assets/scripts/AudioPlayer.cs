@@ -61,29 +61,15 @@ public class AudioPlayer : MonoBehaviour {
     {
         audio_source = GetComponent<AudioSource>();
         /*
-        song = BeatFile.ReadBeatfile("Assets/music/infectious.bf");
-        BPM = song.quarterBPM;
-        offset = song.offset;
-        notes_iter = song.notes.OrderBy(note => note.beat);
-        onBeat += SpawnNotes;
-        beat_time = 60f / (2 * BPM);
-        beats_ahead = Mathf.CeilToInt(note_time / beat_time);
-        */
-        beatLerper = new BeatLerper(events, offset);
-        /*
         System.IO.File.WriteAllLines("beats.txt",
             Enumerable.Range(1, 300 * 32)
                 .Select(t => beatLerper.TimeFromBeat((float)t / 32).ToString())
                 .ToArray());
         */
-        /*
-        Debug.Log(System.Text.RegularExpressions.Regex.Replace(
-        @"
-        foo //bar
-        baz // qux", 
-        @"//[^\n]*$", "", System.Text.RegularExpressions.RegexOptions.Multiline));
-        */
-        BeatFile.ReadStepfile("Assets/music/Baby Bowser's Lullaby.sm");
+        Song song = BeatFile.ReadStepfile("Assets/music/Baby Bowser's Lullaby.sm");
+        //beatLerper = new BeatLerper(song.bpmEvents, song.offset);
+        //notes_iter = song.notes.OrderBy(note => note.beat);
+        onBeat += SpawnNotes;
     }
 
     public void PlaySong()
@@ -92,14 +78,6 @@ public class AudioPlayer : MonoBehaviour {
         audio_source = GetComponent<AudioSource>();
         audio_source.Play(0);
         song_start_time = (float) AudioSettings.dspTime;
-        /*
-        Note note;
-        foreach (NoteData data in notes.OrderBy(n => n.beat))
-        {
-            //Debug.Log("" + data.beat + " " + data.direction);
-            Instantiate(note_prefab).Initialize(GetComponent<AudioPlayer>(), data.beat, data.direction);
-        }
-        */
         
     }
 	
@@ -173,6 +151,7 @@ public class BPMEvent
     }
 }
 
+// DO NOT MESS WITH THIS CLASS FOR THE LOVE OF PALUTENA
 public class BeatLerper
 {
     [System.Serializable]
