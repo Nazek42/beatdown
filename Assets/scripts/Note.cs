@@ -11,6 +11,8 @@ public class Note : MonoBehaviour {
     private double beat;
     private NoteType type;
 
+    private bool added = false;
+
     private new SpriteRenderer renderer;
 
 	// Use this for initialization
@@ -38,6 +40,11 @@ public class Note : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+        if(beat == (Mathf.Floor((float)audioPlayer.SongBeat()) + 1) && !added)
+        {
+            noteController.AddCurrentNote(type);
+            added = true;
+        }
         double until = audioPlayer.beatLerper.TimeFromBeat(beat) - audioPlayer.SongTime();
         if (until < 0)
         {

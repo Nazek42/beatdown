@@ -500,7 +500,7 @@ GameObject:
   - component: {fileID: 483426413}
   - component: {fileID: 483426412}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: AttackHandler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -579,6 +579,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   p1Attack: 0
   p2Attack: 0
+  p1Offset: 0
+  p2Offset: 0
   player: {fileID: 1065726946}
 --- !u!4 &483426415
 Transform:
@@ -728,6 +730,8 @@ MonoBehaviour:
     type: 3}
   reversed: 1
   note_time: 1
+  attackHandler: {fileID: 483426414}
+  player: 1
 --- !u!1 &691080883
 GameObject:
   m_ObjectHideFlags: 0
@@ -886,7 +890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   path: Xepher
   simfileName: Xepher.sm
-  beatMultiplierLog: 0
+  beatMultiplierLog: 2
   boards:
   - {fileID: 1445156075}
   - {fileID: 589869741}
@@ -1331,6 +1335,8 @@ MonoBehaviour:
     type: 3}
   reversed: 0
   note_time: 1
+  attackHandler: {fileID: 483426414}
+  player: 0
 --- !u!1 &1459631692
 GameObject:
   m_ObjectHideFlags: 0

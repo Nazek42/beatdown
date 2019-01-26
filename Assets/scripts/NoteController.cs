@@ -20,6 +20,9 @@ public class NoteController : MonoBehaviour
 
     private readonly int[] distances = { 1, 3, 2, 0 };
 
+    public AttackHandler attackHandler;
+    public AttackHandler.Player player;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -116,5 +119,10 @@ public class NoteController : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void AddCurrentNote(NoteType noteType)
+    {
+        attackHandler.AddNote(player, noteType);
     }
 }
