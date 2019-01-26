@@ -12,7 +12,7 @@ public class Player : MonoBehaviour {
 
     // Timing notes
     private bool sync;      // Did the player match with a subset of the notes on the last beat?
-    private short timing;   // 
+    private short timing;   // How well did the play match his or her move with the beat?
 
     // Amount of health for the player (the game ends when this reaches zero)
     private float health;
@@ -35,16 +35,83 @@ public class Player : MonoBehaviour {
         return action;
     }
 
+    // Takes a keyboard/DDR pad command and converts it into the appropriate move
+    // for the player
+    public Attack DetermineAction(Command comm_code)
+    {
+        switch(comm_code)
+        {
+            case (Command.None):
+                action = Attack.Noop;       // Both players
+                break;
+
+            case (Command.Up):
+                action = Attack.HighBlock;  // Both players
+                break;
+
+            case (Command.Left):
+
+                if (right_facing) action = Attack.Jab;  // Left player
+                else action = Attack.Backdash;          // Right player
+
+                break;
+
+            case (Command.Right):
+
+                if (right_facing) action = Attack.Backdash;  // Left player
+                else action = Attack.Jab;                    // Right player
+
+                break;
+
+            case (Command.Down):
+                action = Attack.LowBlock;   // Both players
+                break;
+
+            case (Command.UpLeft):
+
+                if (right_facing) action = Attack.Uppercut;  // Left player
+                else action = Attack.HighPunch;              // Right player
+
+                break;
+
+            case (Command.UpRight):
+
+                if (right_facing) action = Attack.HighPunch;  // Left player
+                else action = Attack.Uppercut;                // Right player
+
+                break;
+
+            case (Command.LeftRight):
+                action = Attack.BodyCheck;  // Both players
+                break;
+
+            case (Command.UpDown):
+                action = Attack.Projectile; // Both players
+                break;
+
+            case (Command.DownLeft):
+
+                if (right_facing) action = Attack.SpinKick;  // Left player
+                else action = Attack.LowKick;                // Right player
+
+                break;
+
+            case (Command.DownRight):
+
+                if (right_facing) action = Attack.LowKick;  // Left player
+                else action = Attack.SpinKick;              // Right player
+
+                break;
+
+        }
+
+        return action;
+    }
+
     // Get distance of player from center 
     public short GetDistance()
     {
         return distance_from_center;
-    }
-
-    // Get combo points of player
-    public short GetComboPoints()
-    {
-        return combo_points;
     }
 
     // Distance modifier function
@@ -85,6 +152,13 @@ public class Player : MonoBehaviour {
         combo_points = 0;
     }
 
+    // Get combo points of player
+    public short GetComboPoints()
+    {
+        return combo_points;
+    }
+
+    // Returns health of player
     public float GetHealth()
     {
         return health;
@@ -130,18 +204,18 @@ public class Player : MonoBehaviour {
         return block;
     }
 
+    // Gets the timing value
+    public short GetTiming()
+    {
+        return timing;
+    }
+
     // Modify timing term
     public short ModTiming(short mod)
     {
         if (mod >= 0 && mod <= 7)
             timing = mod;
 
-        return timing;
-    }
-
-    // Gets the timing value
-    public short GetTiming()
-    {
         return timing;
     }
 
