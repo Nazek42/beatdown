@@ -31,6 +31,15 @@ public class NoteController : MonoBehaviour
         end_y = topLine.GetPosition(0).y;
     }
 
+    public void Initialize(AudioPlayer controller_, IEnumerable<NoteData> notes_)
+    {
+        controller = controller_;
+        notes = reversed ? notes_.Select(ReverseNote) : notes_;
+        controller.onBeat += SpawnNotes;
+        controller.onBeat += AnimateLines;
+        Debug.Log("Note controller " + gameObject.name + " ready with " + notes.Count() + " notes");
+    }
+
     public static NoteData ReverseNote(NoteData note)
     {
         switch (note.direction)
@@ -42,14 +51,6 @@ public class NoteController : MonoBehaviour
             default:
                 return note;
         }
-    }
-
-    public void Initialize(AudioPlayer controller_, IEnumerable<NoteData> notes_)
-    {
-        controller = controller_;
-        notes = reversed ? notes_.Select(ReverseNote) : notes_;
-        controller.onBeat += SpawnNotes;
-        Debug.Log("Note controller " + gameObject.name + " ready with " + notes.Count() + " notes");
     }
 
     private void SpawnNotes(double current_beat)
@@ -70,9 +71,9 @@ public class NoteController : MonoBehaviour
 
     private IEnumerator LineBulge()
     {
-        topLine.widthMultiplier = .15f;
-        bottomLine.widthMultiplier = .15f;
-        yield return new WaitForSeconds(0.1f);
+        topLine.widthMultiplier = .2f;
+        bottomLine.widthMultiplier = .2f;
+        yield return new WaitForSeconds(0.06f);
         topLine.widthMultiplier = .1f;
         bottomLine.widthMultiplier = .1f;
     }
