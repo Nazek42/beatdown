@@ -13,6 +13,9 @@ public class AttackHandler : MonoBehaviour
     private bool p1Ready;
     private bool p2Ready;
 
+    private int p1Score = 0;
+    private int p2Score = 0;
+
     private List<NoteType> p1Notes;
     private List<NoteType> p2Notes;
 
@@ -95,6 +98,7 @@ public class AttackHandler : MonoBehaviour
         else if (p1Attempted == p1Actual)
         {
             p1Message = "HIT";
+            p1Score += 1;
         }
         else
         {
@@ -108,6 +112,7 @@ public class AttackHandler : MonoBehaviour
         else if (p2Attempted == p2Actual)
         {
             p2Message = "HIT";
+            p2Score += 1;
         }
         else
         {
@@ -115,7 +120,7 @@ public class AttackHandler : MonoBehaviour
         }
 
         // GetComponent<TextMesh>().text = p1Attempted + p2Attempted + "\n" + p1Actual + p2Actual + "\n" + Mathf.Round(1000F*(float)p1Offset).ToString() + " " + Mathf.Round(1000F * (float)p2Offset).ToString();
-        GetComponent<TextMesh>().text = p1Message + "   " + p2Message;
+        GetComponent<TextMesh>().text = p1Message + "   " + p2Message + "\n" + p1Score + "    " + p2Score ;
         GetComponent<TextMesh>().text.Replace("\n", "\\n");
 
         p1Attack = BeatInput.Attack.None;
