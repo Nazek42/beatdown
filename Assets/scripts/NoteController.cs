@@ -58,7 +58,7 @@ public class NoteController : MonoBehaviour
             note => Note.DoubleIsInteger(note.beat)
                     && (controller.beatLerper.TimeFromBeat(note.beat) - controller.SongTime()) < (note_time + note_pre_time)))
         {
-            Debug.Log("spawning note for beat " + note.beat);
+            //Debug.Log("spawning note for beat " + note.beat);
             Instantiate(note_prefab).Initialize(controller, this, note.beat, note.direction);
         }
     }
