@@ -90,14 +90,14 @@ public class BeatFile {
             for (int b = 0; b < divs; b++)
             {
                 string line = measure[b];
-                Debug.Log("Line of length " + line.Length + ": \"" + line + '"');
-                Debug.Log("Full measure: \"" + measure + '"');  
+                //Debug.Log("Line of length " + line.Length + ": \"" + line + '"');
+                //Debug.Log("Full measure: \"" + measure + '"');  
                 for (int col = 0; col < line.Length; col++)
                 {
                     if (line[col] != '0')
                     {
                         double beat = (m + b / (double) divs) * 4;
-                        Debug.Log("measure " + m + ", sub-beat " + b + ", output beat = " + beat);
+                        //Debug.Log("measure " + m + ", sub-beat " + b + ", output beat = " + beat);
                         notes.Add(new NoteData(beat, directionMap[col]));
                     }
                 }

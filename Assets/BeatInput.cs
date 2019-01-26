@@ -14,16 +14,28 @@ public class BeatInput : MonoBehaviour
     public string leftButton;
     public string rightButton;
 
+    public AttackHandler.Player player;
+    public AttackHandler attackHandler;
 
     public AudioPlayer controller;
 
-    private Attack attack;
+    // private Attack attack;
     private InputEvent lastInput;
+
+    public Attack GetAttack()
+    {
+        return attackHandler.GetAttack(player);
+    }
+
+    public void SetAttack(Attack attack)
+    {
+        attackHandler.SetAttack(player, attack);
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        attack = Attack.None;
+        SetAttack(Attack.None);
         //chordWindow = timePerBeat;
         lastInput = new InputEvent(InputType.None, AudioSettings.dspTime);
 
@@ -38,34 +50,45 @@ public class BeatInput : MonoBehaviour
         double offset = curTime - lastInput.time;
         //beatAccum -= timePerBeat;
         // audioSource.PlayOneShot(sound);
-        if(attack == Attack.None)
+        if(GetAttack() == Attack.None)
         {
             switch (lastInput.input)
             {
                 case InputType.Down:
-                    attack = Attack.Down;
+                    SetAttack(Attack.Down);
                     break;
                 case InputType.Up:
-                    attack = Attack.Up;
+                    SetAttack(Attack.Up);
                     break;
                 case InputType.Left:
-                    attack = Attack.Left;
+                    SetAttack(Attack.Left);
                     break;
                 case InputType.Right:
-                    attack = Attack.Right;
+                    SetAttack(Attack.Right);
                     break;
                 default:
                     break;
             }
         }
+        
         // Print out the attack
         //Debug.Log(attack);
         //lastInput.timeUntilBeat += inputLatency;
-        GetComponent<TextMesh>().text = Mathf.RoundToInt((float)beatNum).ToString() + " " + attack.ToString() + " " + OffsetToCheer(offset).ToString();// + " " + TimeToName(attack, lastInput.timeUntilBeat) + " " + lastInput.timeUntilBeat.ToString();
+        if (GetAttack() == Attack.None)
+        {
+            GetComponent<TextMesh>().text = "";
+        }
+        else
+        {
+            GetComponent<TextMesh>().text = OffsetToCheer(offset).ToString();
+        }
+        attackHandler.BeatReady(player);
+
+
         //Debug.Log(lastInput.input);
         //Debug.Log(lastInput.timeUntilBeat);
         // Reset the attack and input stack
-        attack = Attack.None;
+        // SetAttack(Attack.None);
         lastInput.input = InputType.None;
         lastInput.time = AudioSettings.dspTime;
     }
@@ -76,149 +99,108 @@ public class BeatInput : MonoBehaviour
         //beatAccum += ((AudioSettings.dspTime)- last);
         //last = (AudioSettings.dspTime);
         // If attack has been determined, don't bother checking inputs
-        if (attack == Attack.None)
+        if (GetAttack() == Attack.None)
         {
-            // Check to see if there is an existing input that has passed the chord window
-            if (lastInput.input != InputType.None)
+            // Check inputs
+            bool up = Input.GetButtonDown(upButton);
+            bool down = Input.GetButtonDown(downButton);
+            bool left = Input.GetButtonDown(leftButton);
+            bool right = Input.GetButtonDown(rightButton);
+
+            // Check if we can just set the input
+            if (lastInput.input == InputType.None)
             {
-                // Get current time to beat
-                //double timeUntilBeat = timePerBeat - beatAccum;
-                // Determine how far current time to beat is from the last input
-               //double timeSinceInput = timeUntilBeat - lastInput.timeUntilBeat;
-                // Determine if this time is too long
-
-                /*if (timeSinceInput > chordWindow || beatAccum >= timePerBeat)
+                if (up)
                 {
-                    switch (lastInput.input)
-                    {
-                        case InputType.Down:
-                            attack = Attack.Down;
-                            break;
-                        case InputType.Up:
-                            attack = Attack.Up;
-                            break;
-                        case InputType.Left:
-                            attack = Attack.Left;
-                            break;
-                        case InputType.Right:
-                            attack = Attack.Right;
-                            break;
-                        default:
-                            break;
-                    }
-                }*/
+                    lastInput.input = InputType.Up;
+                    lastInput.time = AudioSettings.dspTime;
+                    up = false;
+                }
+                else if (down)
+                {
+                    lastInput.input = InputType.Down;
+                    lastInput.time = AudioSettings.dspTime;
+                    down = false;
+                }
+                else if (left)
+                {
+                    lastInput.input = InputType.Left;
+                    lastInput.time = AudioSettings.dspTime;
+                    left = false;
+                }
+                else if (right)
+                {
+                    lastInput.input = InputType.Right;
+                    lastInput.time = AudioSettings.dspTime;
+                    right = false;
+                }
             }
-            //else {
-                // Check inputs
-                // bool up = Input.GetKeyDown(KeyCode.UpArrow);
-                //bool down = Input.GetKeyDown(KeyCode.DownArrow);
-                //bool left = Input.GetKeyDown(KeyCode.LeftArrow);
-                //bool right = Input.GetKeyDown(KeyCode.RightArrow);
-                bool up = Input.GetButtonDown(upButton);
-                bool down = Input.GetButtonDown(downButton);
-                bool left = Input.GetButtonDown(leftButton);
-                bool right = Input.GetButtonDown(rightButton);
-                
-           
-
-                // Check if we can just set the input
-                if (lastInput.input == InputType.None)
+            // Check for chords with the last input
+            if(lastInput.input == InputType.Up)
+            {
+                if(left)
                 {
-                    if (up)
-                    {
-                        lastInput.input = InputType.Up;
-                        lastInput.time = AudioSettings.dspTime;
-                        up = false;
-                    }
-                    else if (down)
-                    {
-                        lastInput.input = InputType.Down;
-                        lastInput.time = AudioSettings.dspTime;
-                        down = false;
-                    }
-                    else if (left)
-                    {
-                        lastInput.input = InputType.Left;
-                        lastInput.time = AudioSettings.dspTime;
-                        left = false;
-                    }
-                    else if (right)
-                    {
-                        lastInput.input = InputType.Right;
-                        lastInput.time = AudioSettings.dspTime;
-                        right = false;
-                    }
+                    SetAttack(Attack.UpLeft);
                 }
-                // Check for chords with the last input
-                if(lastInput.input == InputType.Up)
+                else if(right)
                 {
-                    if(left)
-                    {
-                        attack = Attack.UpLeft;
-                    }
-                    else if(right)
-                    {
-                        attack = Attack.UpRight;
-                    }
-                    else if(down)
-                    {
-                        attack = Attack.UpDown;
-                    }
+                    SetAttack(Attack.UpRight);
                 }
-                else if (lastInput.input == InputType.Down)
+                else if(down)
                 {
-                    if (left)
-                    {
-                        attack = Attack.DownLeft;
-                    }
-                    else if (right)
-                    {
-                        attack = Attack.DownRight;
-                    }
-                    else if (down)
-                    {
-                        attack = Attack.UpDown;
-                    }
+                    SetAttack(Attack.UpDown);
                 }
-                else if (lastInput.input == InputType.Left)
+            }
+            else if (lastInput.input == InputType.Down)
+            {
+                if (left)
                 {
-                    if (up)
-                    {
-                        attack = Attack.UpLeft;
-                    }
-                    else if (right)
-                    {
-                        attack = Attack.LeftRight;
-                    }
-                    else if (down)
-                    {
-                        attack = Attack.DownLeft;
-                    }
+                    SetAttack(Attack.DownLeft);
                 }
-                else if (lastInput.input == InputType.Right)
+                else if (right)
                 {
-                    if (up)
-                    {
-                        attack = Attack.UpRight;
-                    }
-                    else if (left)
-                    {
-                        attack = Attack.LeftRight;
-                    }
-                    else if (down)
-                    {
-                        attack = Attack.DownRight;
-                    }
+                    SetAttack(Attack.DownRight);
                 }
-        }
-        else
-        {
-            Debug.Log("Attack determined, not bothering");
+                else if (down)
+                {
+                    SetAttack(Attack.UpDown);
+                }
+            }
+            else if (lastInput.input == InputType.Left)
+            {
+                if (up)
+                {
+                    SetAttack(Attack.UpLeft);
+                }
+                else if (right)
+                {
+                    SetAttack(Attack.LeftRight);
+                }
+                else if (down)
+                {
+                    SetAttack(Attack.DownLeft);
+                }
+            }
+            else if (lastInput.input == InputType.Right)
+            {
+                if (up)
+                {
+                    SetAttack(Attack.UpRight);
+                }
+                else if (left)
+                {
+                    SetAttack(Attack.LeftRight);
+                }
+                else if (down)
+                {
+                    SetAttack(Attack.DownRight);
+                }
+            }
         }
 
     }
 
-    private enum Attack
+    public enum Attack
     {
         None,
         Up,
@@ -274,6 +256,37 @@ public class BeatInput : MonoBehaviour
         else
         {
             return "Bad";
+        }
+    }
+
+    public static string AttackToArrows(Attack attack)
+    {
+        switch(attack)
+        {
+            case Attack.None:
+                return "    ";
+            case Attack.Up:
+                return " ^  ";
+            case Attack.Left:
+                return "<   ";
+            case Attack.Right:
+                return "   >";
+            case Attack.Down:
+                return "  v ";
+            case Attack.UpLeft:
+                return "<^  ";
+            case Attack.UpRight:
+                return " ^ >";
+            case Attack.LeftRight:
+                return "<  >";
+            case Attack.UpDown:
+                return " ^v ";
+            case Attack.DownLeft:
+                return "< v ";
+            case Attack.DownRight:
+                return "  v>";
+            default:
+                return "    ";
         }
     }
 }
