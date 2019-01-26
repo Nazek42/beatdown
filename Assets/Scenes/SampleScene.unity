@@ -890,7 +890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   path: Xepher
   simfileName: Xepher.sm
-  beatMultiplierLog: -1
+  beatMultiplierLog: 2
   boards:
   - {fileID: 1445156075}
   - {fileID: 589869741}
