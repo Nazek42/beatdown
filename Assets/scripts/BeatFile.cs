@@ -11,7 +11,7 @@ public class Song
 {
     public string name;
     public string artist;
-    public float offset;
+    public double offset;
     public Dictionary<string, string> metadata;
     public BPMEvent[] bpmEvents;
     public NoteData[] notes;
@@ -43,7 +43,7 @@ public class BeatFile {
 
         song.name   = tags.ContainsKey("TITLE")  ? tags["TITLE"]               : "[no title]";
         song.artist = tags.ContainsKey("ARTIST") ? tags["ARTIST"]              : "[no artist]";
-        song.offset = tags.ContainsKey("OFFSET") ? float.Parse(tags["OFFSET"]) : 0;
+        song.offset = tags.ContainsKey("OFFSET") ? double.Parse(tags["OFFSET"]) : 0;
         song.metadata = new Dictionary<string, string>(tags);
 
         song.bpmEvents = ParseBPMsAndStops(tags["BPMS"], tags["STOPS"]).OrderBy(ev => ev.beat).ToArray();
@@ -78,7 +78,10 @@ public class BeatFile {
         var notes = new List<NoteData>();
         notesTag = Remove(notesTag, @".*\:", RegexOptions.Multiline);
         string[][] measures = notesTag.Split(new[] { ',' })
-                                                 .Select(measure => measure.Split(new[] { System.Environment.NewLine }, System.StringSplitOptions.None)).ToArray();
+                                      .Select(measure => measure.Split(new[] { System.Environment.NewLine }, System.StringSplitOptions.None)
+                                                                .Select(line => Remove(line, @"\s+"))
+                                                                .ToArray())
+                                      .ToArray();
 
         for (int m = 0; m < measures.Length; m++)
         {
@@ -87,25 +90,27 @@ public class BeatFile {
             for (int b = 0; b < divs; b++)
             {
                 string line = measure[b];
-                Debug.Log(line.Length + line);
-                Debug.Log(measure);
+                //Debug.Log("Line of length " + line.Length + ": \"" + line + '"');
+                //Debug.Log("Full measure: \"" + measure + '"');  
                 for (int col = 0; col < line.Length; col++)
                 {
                     if (line[col] != '0')
                     {
-                        notes.Add(new NoteData((m + b/divs) * 4, directionMap[col]));
+                        double beat = (m + b / (double) divs) * 4;
+                        //Debug.Log("measure " + m + ", sub-beat " + b + ", output beat = " + beat);
+                        notes.Add(new NoteData(beat, directionMap[col]));
                     }
                 }
             }
         }
 
-        return notes.ToArray();
+        return notes.OrderBy(note => note.beat).ToArray();
     }
 
     private static BPMEvent ParseBPMEvent(Match ev, BPMEventType type)
     {
-        return new BPMEvent(type, float.Parse(ev.Groups[1].Value),
-                                  float.Parse(ev.Groups[2].Value));
+        return new BPMEvent(type, double.Parse(ev.Groups[1].Value),
+                                  double.Parse(ev.Groups[2].Value));
     }
 
     private static string Remove(string input, string regex)
@@ -130,9 +135,9 @@ public class BeatFile {
         metadata.MoveNext();
         song.artist = metadata.Current;
         metadata.MoveNext();
-        song.quarterBPM = float.Parse(metadata.Current);
+        song.quarterBPM = double.Parse(metadata.Current);
         metadata.MoveNext();
-        song.offset = float.Parse(metadata.Current);
+        song.offset = double.Parse(metadata.Current);
 
         IEnumerable<NoteData> notes_enum = new NoteData[]{}.AsEnumerable();
         foreach (string[] line in lines.Skip(4).Select(l => l.Split(new char[] { ' ' }))) {

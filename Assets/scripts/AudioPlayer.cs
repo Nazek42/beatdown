@@ -9,10 +9,10 @@ public enum NoteType { down = 0, right = 1, up = 2, left = 3 };
 [System.Serializable]
 public class NoteData
 {
-    public float beat;
+    public double beat;
     public NoteType direction;
 
-    public NoteData(float beat_, NoteType direction_)
+    public NoteData(double beat_, NoteType direction_)
     {
         beat = beat_;
         direction = direction_;
@@ -22,38 +22,43 @@ public class NoteData
 public class AudioPlayer : MonoBehaviour {
     AudioSource audio_source;
 
-    [SerializeField] private BPMEvent[] events;
-    [SerializeField] private float timeToEval;
-    private BeatLerper beatLerper;
+    public string path;
+    public string simfileName;
 
-    /*[SerializeField]*/ private float BPM;
-    private Dictionary<float, float> BPMs;
-    private Dictionary<float, float> stops;
-    private AnimationCurve BeatOverTime;
-    private AnimationCurve TimeOverBeat;
-    [SerializeField] private float offset;
+    //[SerializeField] private BPMEvent[] events;
+    //[SerializeField] private double timeToEval;
+    public BeatLerper beatLerper { get; private set; }
+
+    /*[SerializeField]*/ private double BPM;
+    //private Dictionary<double, double> BPMs;
+    //private Dictionary<double, double> stops;
+    //private AnimationCurve BeatOverTime;
+    //private AnimationCurve TimeOverBeat;
+    //[SerializeField] private double offset;
     /*[SerializeField] private Renderer flash;*/
 
     public float left_x;
     public float start_y;
     public float end_y;
     public float note_separation;
-    public float note_time;
-    public int beats_ahead { get; private set; }
+    public double note_time;
+    public double note_pre_time;
+    public LineRenderer topLine, bottomLine;
+
+    private bool playing = false;
+    private bool ready = false;
 
     private Song song;
     // /*[SerializeField]*/ private NoteData[] notes;
     private IEnumerable<NoteData> notes_iter;
     [SerializeField] private Note note_prefab;
 
-    public float beat_time { get; private set; }
-
-    public int song_pos { get; private set; }
-    private float song_start_time;
+    private double old_beat;
+    private double song_start_time;
 
     private readonly int[] distances = { 1, 3, 2, 0 };
 
-    public delegate void OnBeat(int beat_num);
+    public delegate void OnBeat(double beat);
     public OnBeat onBeat;
 
     // Use this for initialization
@@ -63,42 +68,66 @@ public class AudioPlayer : MonoBehaviour {
         /*
         System.IO.File.WriteAllLines("beats.txt",
             Enumerable.Range(1, 300 * 32)
-                .Select(t => beatLerper.TimeFromBeat((float)t / 32).ToString())
+                .Select(t => beatLerper.TimeFromBeat((double)t / 32).ToString())
                 .ToArray());
         */
-        Song song = BeatFile.ReadStepfile("Assets/music/Baby Bowser's Lullaby.sm");
-        //beatLerper = new BeatLerper(song.bpmEvents, song.offset);
-        //notes_iter = song.notes.OrderBy(note => note.beat);
+        song = BeatFile.ReadStepfile("Assets/Resources/music/" + path + "/" + simfileName);
+        string audio_path = "music/" + path + "/" + System.IO.Path.GetFileNameWithoutExtension(song.metadata["MUSIC"]);
+        Debug.Log(audio_path);
+        audio_source.clip = Resources.Load<AudioClip>(audio_path);
+        beatLerper = new BeatLerper(song.bpmEvents, song.offset);
+        notes_iter = song.notes.OrderBy(note => note.beat);
         onBeat += SpawnNotes;
+        onBeat += AnimateLines;
+        ready = true;
+        Debug.Log("Ready.");
     }
 
     public void PlaySong()
     {
-        song_pos = 0;
-        audio_source = GetComponent<AudioSource>();
+        Debug.Log(audio_source.clip);
         audio_source.Play(0);
-        song_start_time = (float) AudioSettings.dspTime;
-        
+        song_start_time = (double) AudioSettings.dspTime;
+        playing = true;
+        Debug.Log("Playing!");
     }
-	
-	// Update is called once per frame
-	void Update () {
-        /*
-        int new_pos = (int)((SongTime() - offset) / beat_time);
-        if (new_pos != song_pos && !Object.ReferenceEquals(onBeat, null)) {
-            onBeat(new_pos);
-        }
-        song_pos = new_pos;
-        */
 
-	}
-
-    private void SpawnNotes(int current_beat)
+    // Update is called once per frame
+    void Update()
     {
-        foreach (NoteData data in notes_iter.TakeWhile(note => note.beat - current_beat <= beats_ahead))
+        if (playing && SongTime() > song.offset)
         {
-            Instantiate(note_prefab).Initialize(GetComponent<AudioPlayer>(), data.beat, data.direction);
+            double new_beat = SongBeat();
+            if (System.Math.Truncate(new_beat) != System.Math.Truncate(old_beat) && !Object.ReferenceEquals(onBeat, null))
+            {
+                onBeat(new_beat);
+            }
+            old_beat = new_beat;
         }
+    }
+
+    private void SpawnNotes(double current_beat)
+    {
+        //Debug.Log("hello from SpawnNotes");
+        foreach (NoteData note in notes_iter.Where(note => (beatLerper.TimeFromBeat(note.beat) - SongTime()) < (note_time + note_pre_time)))
+        {
+            //Debug.Log("spawning note for beat " + note.beat);
+            Instantiate(note_prefab).Initialize(GetComponent<AudioPlayer>(), note.beat, note.direction);
+        }
+    }
+
+    private void AnimateLines(double _)
+    {
+        StartCoroutine(LineBulge());
+    }
+
+    private IEnumerator LineBulge()
+    {
+        topLine.widthMultiplier = .15f;
+        bottomLine.widthMultiplier = .15f;
+        yield return new WaitForSeconds(0.1f);
+        topLine.widthMultiplier = .1f;
+        bottomLine.widthMultiplier = .1f;
     }
 
     public double SongTime ()
@@ -106,9 +135,9 @@ public class AudioPlayer : MonoBehaviour {
         return AudioSettings.dspTime - song_start_time;
     }
 
-    public float TimeOfBeat(float beat_num)
+    public double SongBeat()
     {
-        return offset + beat_time * beat_num;
+        return beatLerper.BeatFromTime(SongTime());
     }
 
     public float GetNoteX(NoteType type)
@@ -133,11 +162,11 @@ public enum BPMEventType { BPMChange, Stop };
 public class BPMEvent
 {
     public BPMEventType type;
-    public float beat;
-    public float newBPM;
-    public float stopDuration;
+    public double beat;
+    public double newBPM;
+    public double stopDuration;
 
-    public BPMEvent(BPMEventType type, float beat_, float param)
+    public BPMEvent(BPMEventType type, double beat_, double param)
     {
         beat = beat_;
         if (type == BPMEventType.BPMChange)
@@ -157,25 +186,24 @@ public class BeatLerper
     [System.Serializable]
     public class BeatLine
     {
-        public float start, end, bps, intercept;
-        private float offset;
+        public double start, end, bps, intercept, offset;
 
-        public BeatLine(float start_, float end_, float bps_, float intercept_, float offset_)
+        public BeatLine(double start_, double end_, double bps_, double intercept_, double offset_)
         {
             start = start_; end = end_; bps = bps_; intercept = intercept_; offset = offset_;
         }
 
-        public float BeatFromTime(float time)
+        public double BeatFromTime(double time)
         {
-            return bps * (time - offset) + intercept;
+            return bps * (time + offset) + intercept;
         }
 
-        public float TimeFromBeat(float beat)
+        public double TimeFromBeat(double beat)
         {
-            return (beat - intercept) / bps + offset;
+            return (beat - intercept) / bps - offset;
         }
 
-        public bool TimeWithinBounds(float time)
+        public bool TimeWithinBounds(double time)
         {
             return (time - offset) > start && (time - offset) <= end;
         }
@@ -183,7 +211,7 @@ public class BeatLerper
 
     private BeatLine[] lines;
 
-    public BeatLerper(BPMEvent[] events_arr, float offset)
+    public BeatLerper(BPMEvent[] events_arr, double offset)
     {
         IEnumerable<BPMEvent> events = events_arr.OrderBy(ev => ev.beat);
         List<BeatLine> lines_l = new List<BeatLine>();
@@ -193,7 +221,7 @@ public class BeatLerper
         {
             Debug.LogException(new System.Exception("First BPM event must be a BPM change"));
         }
-        lines_l.Add(new BeatLine(0, float.PositiveInfinity, ev1.newBPM / 60, 0, offset));
+        lines_l.Add(new BeatLine(0, double.PositiveInfinity, ev1.newBPM / 60, 0, offset));
         
         foreach (BPMEvent ev in events.Skip(1))
         {
@@ -203,27 +231,27 @@ public class BeatLerper
 
             if (ev.type == BPMEventType.BPMChange)
             {
-                float new_bps = ev.newBPM / 60;
-                lines_l.Add(new BeatLine(left.end, float.PositiveInfinity, new_bps, ev.beat - new_bps * left.end, offset));
+                double new_bps = ev.newBPM / 60;
+                lines_l.Add(new BeatLine(left.end, double.PositiveInfinity, new_bps, ev.beat - new_bps * left.end, offset));
             }
             else // it's a stop
             {
                 lines_l.Add(new BeatLine(left.end, left.end + ev.stopDuration, 0, ev.beat, offset));
-                lines_l.Add(new BeatLine(left.end + ev.stopDuration, float.PositiveInfinity, left.bps, ev.beat - left.bps * (left.end + ev.stopDuration), offset));
+                lines_l.Add(new BeatLine(left.end + ev.stopDuration, double.PositiveInfinity, left.bps, ev.beat - left.bps * (left.end + ev.stopDuration), offset));
             }
         }
 
         lines = lines_l.ToArray();
     }
 
-    public float BeatFromTime(float time)
+    public double BeatFromTime(double time)
     {
         return lines.AsEnumerable().Where( line => line.TimeWithinBounds( time ) )
                                    .First( )
                                    .BeatFromTime( time );
     }
 
-    public float TimeFromBeat(float beat)
+    public double TimeFromBeat(double beat)
     {
         return lines.AsEnumerable().Where( line => line.TimeWithinBounds( line.TimeFromBeat( beat ) ) )
                                    .First( )

@@ -7,7 +7,7 @@ public class Note : MonoBehaviour {
     [SerializeField] private Sprite eighthSprite;
 
     private AudioPlayer controller;
-    private float beat;
+    private double beat;
     private NoteType type;
 
     private new SpriteRenderer renderer;
@@ -18,19 +18,25 @@ public class Note : MonoBehaviour {
         renderer.enabled = false;
 	}
 
-    public void Initialize(AudioPlayer c, float b, NoteType t)
+    public void Initialize(AudioPlayer c, double b, NoteType t)
     {
         renderer = GetComponent<SpriteRenderer>();
         controller = c;
         beat = b;
         type = t;
-        renderer.sprite = beat % 2 == 0 ? quarterSprite : eighthSprite;
+
+        renderer.sprite = DoubleIsInteger(beat) ? quarterSprite : eighthSprite;
         transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 90 * (int)type));
+    }
+
+    public static bool DoubleIsInteger(double x)
+    {
+        return (x - System.Math.Truncate(x)) < double.Epsilon;
     }
 
 	// Update is called once per frame
 	void Update () {
-        float until = controller.TimeOfBeat(beat) - (float)controller.SongTime();
+        double until = controller.beatLerper.TimeFromBeat(beat) - controller.SongTime();
         if (until < 0)
         {
             Destroy(gameObject);
