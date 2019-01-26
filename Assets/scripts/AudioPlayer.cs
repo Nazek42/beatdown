@@ -25,38 +25,18 @@ public class AudioPlayer : MonoBehaviour {
     public string path;
     public string simfileName;
 
-    //[SerializeField] private BPMEvent[] events;
-    //[SerializeField] private double timeToEval;
+    [SerializeField] private NoteController[] boards;
+    
     public BeatLerper beatLerper { get; private set; }
-
-    /*[SerializeField]*/ private double BPM;
-    //private Dictionary<double, double> BPMs;
-    //private Dictionary<double, double> stops;
-    //private AnimationCurve BeatOverTime;
-    //private AnimationCurve TimeOverBeat;
-    //[SerializeField] private double offset;
-    /*[SerializeField] private Renderer flash;*/
-
-    public float left_x;
-    public float start_y;
-    public float end_y;
-    public float note_separation;
-    public double note_time;
-    public double note_pre_time;
-    public LineRenderer topLine, bottomLine;
 
     private bool playing = false;
     private bool ready = false;
 
     private Song song;
-    // /*[SerializeField]*/ private NoteData[] notes;
     private IEnumerable<NoteData> notes_iter;
-    [SerializeField] private Note note_prefab;
 
     private double old_beat;
     private double song_start_time;
-
-    private readonly int[] distances = { 1, 3, 2, 0 };
 
     public delegate void OnBeat(double beat);
     public OnBeat onBeat;
@@ -77,11 +57,19 @@ public class AudioPlayer : MonoBehaviour {
         audio_source.clip = Resources.Load<AudioClip>(audio_path);
         beatLerper = new BeatLerper(song.bpmEvents, song.offset);
         notes_iter = song.notes.OrderBy(note => note.beat);
-        onBeat += SpawnNotes;
-        onBeat += AnimateLines;
+        //onBeat += SpawnNotes;
+        //onBeat += AnimateLines;
         ready = true;
+
+        foreach (NoteController board in boards)
+        {
+            board.Initialize(this, notes_iter);
+        }
+
         Debug.Log("Ready.");
     }
+
+    private static void Noop(double _) { }
 
     public void PlaySong()
     {
@@ -98,14 +86,14 @@ public class AudioPlayer : MonoBehaviour {
         if (playing && SongTime() > song.offset)
         {
             double new_beat = SongBeat();
-            if (System.Math.Truncate(new_beat) != System.Math.Truncate(old_beat) && !Object.ReferenceEquals(onBeat, null))
+            if (System.Math.Truncate(new_beat) != System.Math.Truncate(old_beat) && onBeat != null)
             {
                 onBeat(new_beat);
             }
             old_beat = new_beat;
         }
     }
-
+    /*
     private void SpawnNotes(double current_beat)
     {
         //Debug.Log("hello from SpawnNotes");
@@ -129,7 +117,7 @@ public class AudioPlayer : MonoBehaviour {
         topLine.widthMultiplier = .1f;
         bottomLine.widthMultiplier = .1f;
     }
-
+    */
     public double SongTime ()
     {
         return AudioSettings.dspTime - song_start_time;
@@ -138,21 +126,6 @@ public class AudioPlayer : MonoBehaviour {
     public double SongBeat()
     {
         return beatLerper.BeatFromTime(SongTime());
-    }
-
-    public float GetNoteX(NoteType type)
-    {
-        return left_x + note_separation * distances[(int)type];
-    }
-
-    public Vector2 GetStartPos(NoteType type)
-    {
-        return new Vector2(GetNoteX(type), start_y);
-    }
-
-    public Vector2 GetEndPos(NoteType type)
-    {
-        return new Vector2(GetNoteX(type), end_y);
     }
 }
 

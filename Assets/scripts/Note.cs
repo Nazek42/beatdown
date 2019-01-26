@@ -6,7 +6,8 @@ public class Note : MonoBehaviour {
     [SerializeField] private Sprite quarterSprite;
     [SerializeField] private Sprite eighthSprite;
 
-    private AudioPlayer controller;
+    private AudioPlayer audioPlayer;
+    private NoteController noteController;
     private double beat;
     private NoteType type;
 
@@ -18,10 +19,11 @@ public class Note : MonoBehaviour {
         renderer.enabled = false;
 	}
 
-    public void Initialize(AudioPlayer c, double b, NoteType t)
+    public void Initialize(AudioPlayer c, NoteController n, double b, NoteType t)
     {
         renderer = GetComponent<SpriteRenderer>();
-        controller = c;
+        audioPlayer = c;
+        noteController = n;
         beat = b;
         type = t;
 
@@ -29,6 +31,7 @@ public class Note : MonoBehaviour {
         transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 90 * (int)type));
         if(!DoubleIsInteger(b))
         {
+            Debug.Log("wtf");
             Destroy(gameObject);
         }
     }
@@ -40,14 +43,14 @@ public class Note : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        double until = controller.beatLerper.TimeFromBeat(beat) - controller.SongTime();
+        double until = audioPlayer.beatLerper.TimeFromBeat(beat) - audioPlayer.SongTime();
         if (until < 0)
         {
             Destroy(gameObject);
             return;
         }
-        transform.position = Vector2.Lerp(controller.GetStartPos(type), controller.GetEndPos(type), (float)(1 - until / controller.note_time));
-        if (!renderer.enabled && until <= controller.note_time)
+        transform.position = Vector2.Lerp(noteController.GetStartPos(type), noteController.GetEndPos(type), (float)(1 - until / noteController.note_time));
+        if (!renderer.enabled && until <= noteController.note_time)
         {
             renderer.enabled = true;
         }
