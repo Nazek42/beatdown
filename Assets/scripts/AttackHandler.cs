@@ -6,6 +6,8 @@ public class AttackHandler : MonoBehaviour
 {
     public BeatInput.Attack p1Attack;
     public BeatInput.Attack p2Attack;
+    public double p1Offset;
+    public double p2Offset;
     public AudioPlayer player;
 
     private bool p1Ready;
@@ -18,6 +20,8 @@ public class AttackHandler : MonoBehaviour
         p2Attack = BeatInput.Attack.None;
         p1Ready = false;
         p2Ready = false;
+        p1Offset = 0.0;
+        p2Offset = 0.0;
     }
 
     // Update is called once per frame
@@ -27,7 +31,8 @@ public class AttackHandler : MonoBehaviour
     }
     void Beat(double beatNum)
     {
-        GetComponent<TextMesh>().text = BeatInput.AttackToArrows(p1Attack) + BeatInput.AttackToArrows(p2Attack);
+        GetComponent<TextMesh>().text = BeatInput.AttackToArrows(p1Attack) + BeatInput.AttackToArrows(p2Attack) + "\n" + Mathf.Round(1000F*(float)p1Offset).ToString() + " " + Mathf.Round(1000F * (float)p2Offset).ToString();
+        GetComponent<TextMesh>().text.Replace("\n", "\\n");
         p1Attack = BeatInput.Attack.None;
         p2Attack = BeatInput.Attack.None;
     }
@@ -64,7 +69,6 @@ public class AttackHandler : MonoBehaviour
 
     public void SetAttack(Player player, BeatInput.Attack attack)
     {
-        //Debug.Log(player.ToString() + " " + attack.ToString());
         switch(player)
         {
             case Player.Player1:
@@ -72,6 +76,29 @@ public class AttackHandler : MonoBehaviour
                 break;
             case Player.Player2:
                 p2Attack = attack;
+                break;
+        }
+    }
+    public double GetOffset(Player player)
+    {
+        switch (player)
+        {
+            case Player.Player1:
+                return p1Offset;
+            case Player.Player2:
+                return p2Offset;
+        }
+        return p1Offset;
+    }
+    public void SetOffset(Player player, double offset)
+    {
+        switch (player)
+        {
+            case Player.Player1:
+                p1Offset = offset;
+                break;
+            case Player.Player2:
+                p2Offset = offset;
                 break;
         }
     }

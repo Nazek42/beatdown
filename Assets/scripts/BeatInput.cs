@@ -31,7 +31,14 @@ public class BeatInput : MonoBehaviour
     {
         attackHandler.SetAttack(player, attack);
     }
-
+    public double GetOffset()
+    {
+        return attackHandler.GetOffset(player);
+    }
+    public void SetOffset(double offset)
+    {
+        attackHandler.SetOffset(player, offset);
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -48,9 +55,9 @@ public class BeatInput : MonoBehaviour
         double curTime = AudioSettings.dspTime;
         // Get offset
         double offset = curTime - lastInput.time;
-        //beatAccum -= timePerBeat;
+        SetOffset(offset);
         // audioSource.PlayOneShot(sound);
-        if(GetAttack() == Attack.None)
+        if (GetAttack() == Attack.None)
         {
             switch (lastInput.input)
             {
@@ -82,6 +89,7 @@ public class BeatInput : MonoBehaviour
         {
             GetComponent<TextMesh>().text = OffsetToCheer(offset).ToString();
         }
+        
         attackHandler.BeatReady(player);
 
 
