@@ -1052,9 +1052,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 210abed27f85ff94bb07fb7acff13277, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+
   path: Xepher
   simfileName: Xepher.sm
   beatMultiplierLog: 0
+
   boards:
   - {fileID: 1445156075}
   - {fileID: 589869741}

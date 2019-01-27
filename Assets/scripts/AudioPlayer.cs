@@ -32,8 +32,8 @@ public class AudioPlayer : MonoBehaviour {
     
     public BeatLerper beatLerper { get; private set; }
 
-    private bool playing = false;
-    private bool ready = false;
+    public bool playing = false;
+    public bool ready = false;
 
     private Song song;
     private IEnumerable<NoteData> notes_iter;
