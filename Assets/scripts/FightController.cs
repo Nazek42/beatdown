@@ -37,7 +37,7 @@ public class FightController : MonoBehaviour {
         0.0f,       /* Low Block */
         0.0f,       /* Backdash */
         2.0f,       /* Jab */
-        2.0f,       /* Projectile */
+        0.0f,       /* Projectile */
         2.0f,       /* Body Check */
         4.0f,       /* Uppercut */
         4.0f,       /* High Punch */
@@ -47,7 +47,7 @@ public class FightController : MonoBehaviour {
     };
 
     // Combo point damage multiplier for uppercuts and projectiles
-    static private float combo_mult = 0.125f;
+    static private float combo_mult = 1f;
 
     // Function called every beat
     void Beat(double b)
@@ -167,21 +167,14 @@ public class FightController : MonoBehaviour {
         float right_damage;
 
         // Calculate right player damage
-        if (right_act == Player.Attack.Projectile || right_act == Player.Attack.Uppercut)
-            right_damage = BaseDmgTable[(int)right_act] * (1.0f + right_player.GetComboPoints() * combo_mult);
-
-        else right_damage = BaseDmgTable[(int)right_act];
+        right_damage = CalculateAttack(right_player, right_act);
 
         // Calculate left player damage
-        if (left_act == Player.Attack.Projectile || left_act == Player.Attack.Uppercut)
-            left_damage = BaseDmgTable[(int)left_act] * (1.0f + left_player.GetComboPoints() * combo_mult);
+        left_damage = CalculateAttack(left_player, left_act);
 
-        else left_damage = BaseDmgTable[(int)left_act];
         // Apply damage calculations
         left_player.ModHealth(-right_damage);
         right_player.ModHealth(-left_damage);
-
-        return;
     }
 
     private void Clash(Player.Attack left_act, Player.Attack right_act)
@@ -189,8 +182,8 @@ public class FightController : MonoBehaviour {
         if(left_act == Player.Attack.Projectile)
         {
             // Calculate player damage (both known projectiles)
-            float right_damage = BaseDmgTable[(int)right_act] * (1.0f + right_player.GetComboPoints() * combo_mult);
-            float left_damage = BaseDmgTable[(int)left_act] * (1.0f + left_player.GetComboPoints() * combo_mult);
+            float right_damage = CalculateBoostedAttack(right_player, right_act);
+            float left_damage = CalculateBoostedAttack(left_player, left_act);
 
             float tide = right_damage - left_damage;
 
@@ -202,68 +195,67 @@ public class FightController : MonoBehaviour {
 
         }
 
-        // Players neutralize each other's damage (no op)
-
-        return;
+        // If not projectiles, players neutralize each other's damage (noop)
     }
 
     private void Block(Player.Attack left_act, Player.Attack right_act)
     {
-        // Left is the blocker 
+        Player blocker, attacker;
+        Player.Attack atk;
         if(left_act == Player.Attack.HighBlock || left_act == Player.Attack.LowBlock)
         {
-            float block_val = left_player.GetBlock();
-
-
-            float antag_dmg;
-            // Calculate right player damage
-            if (right_act == Player.Attack.Projectile || right_act == Player.Attack.Uppercut)
-                antag_dmg = BaseDmgTable[(int)right_act] * (1.0f + right_player.GetComboPoints() * combo_mult);
-
-            else antag_dmg = BaseDmgTable[(int)right_act];
-
-            // Take remaining block value after hit
-            float remainder = block_val - antag_dmg;
-
-            // If damage exceeds block value
-            if(remainder < 0.0f)
-            {
-                left_player.ModBlock(-block_val);
-                left_player.ModHealth(remainder);
-            }
-
-            // If damage does not exceed block value
-            else left_player.ModBlock(-remainder);
-
+            blocker = left_player;
+            attacker = right_player;
+            atk = right_act;
         }
-
-        // Right is the blocker
         else
         {
-            float block_val = right_player.GetBlock();
-
-            float antag_dmg;
-            // Calculate right player damage
-            if (left_act == Player.Attack.Projectile || left_act == Player.Attack.Uppercut)
-                antag_dmg = BaseDmgTable[(int)left_act] * (1.0f + left_player.GetComboPoints() * combo_mult);
-
-            else antag_dmg = BaseDmgTable[(int)left_act];
-
-            // Take remaining block value after hit
-            float remainder = block_val - antag_dmg;
-
-            // If damage exceeds block value
-            if (remainder < 0.0f)
-            {
-                right_player.ModBlock(-block_val);
-                right_player.ModHealth(remainder);
-            }
-
-            // If damage does not exceed block value
-            else right_player.ModBlock(-remainder);
+            blocker = right_player;
+            attacker = left_player;
+            atk = left_act;
         }
 
+        float block_val = blocker.GetBlock();
+        
+        float antag_dmg;
+        // Calculate attacker damage
+        antag_dmg = CalculateAttack(attacker, atk);
+
+        // Take remaining block value after hit
+        float remainder = block_val - antag_dmg;
+
+        // If damage exceeds block value
+        if (remainder < 0.0f)
+        {
+            blocker.ModBlock(-block_val);
+            blocker.ModHealth(remainder);
+        }
+
+        // If damage does not exceed block value
+        else blocker.ModBlock(-antag_dmg);
+
         return;
+    }
+
+    // Utility functions
+    private static float CalculateAttack(Player attacker, Player.Attack action)
+    {
+        float dmg;
+        if (action == Player.Attack.Projectile || action == Player.Attack.Uppercut)
+        {
+            dmg = CalculateBoostedAttack(attacker, action);
+            attacker.DrainCombos();
+        }
+        else
+        {
+            dmg = BaseDmgTable[(int)action];
+        }
+        return dmg;
+    }
+
+    private static float CalculateBoostedAttack(Player attacker, Player.Attack action)
+    {
+        return BaseDmgTable[(int)action] + (attacker.GetComboPoints() * combo_mult);
     }
 
     // Use this for initialization
