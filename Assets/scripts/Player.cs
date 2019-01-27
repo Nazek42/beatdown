@@ -206,6 +206,12 @@ public class Player : MonoBehaviour {
         return block;
     }
 
+    public float RefillBlock()
+    {
+        block = max_block;
+        return block;
+    }
+
     // Gets the timing value
     public short GetTiming()
     {

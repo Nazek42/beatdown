@@ -215,6 +215,12 @@ public class FightController : MonoBehaviour {
             atk = left_act;
         }
 
+        if (blocker.GetComboPoints() == 8)
+        {
+            blocker.RefillBlock();
+            blocker.DrainCombos();
+        }
+
         float block_val = blocker.GetBlock();
         
         float antag_dmg;
@@ -244,12 +250,20 @@ public class FightController : MonoBehaviour {
         if (action == Player.Attack.Projectile || action == Player.Attack.Uppercut)
         {
             dmg = CalculateBoostedAttack(attacker, action);
-            attacker.DrainCombos();
+            if (action == Player.Attack.Projectile && attacker.GetBlock() == 0)
+            {
+                dmg = 0;
+            }
+            else
+            {
+                attacker.DrainCombos();
+            }
         }
         else
         {
             dmg = BaseDmgTable[(int)action];
         }
+        
         return dmg;
     }
 
