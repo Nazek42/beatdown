@@ -14,7 +14,7 @@ public class BeatInput : MonoBehaviour
     public string leftButton;
     public string rightButton;
 
-    public AttackHandler.Player player;
+    public AttackHandler.PlayerNum player;
     public AttackHandler attackHandler;
 
     public AudioPlayer controller;
@@ -22,14 +22,14 @@ public class BeatInput : MonoBehaviour
     // private Attack attack;
     private InputEvent lastInput;
 
-    public Attack GetAttack()
+    public Command GetCommand()
     {
-        return attackHandler.GetAttack(player);
+        return attackHandler.GetCommand(player);
     }
 
-    public void SetAttack(Attack attack)
+    public void SetCommand(Command attack)
     {
-        attackHandler.SetAttack(player, attack);
+        attackHandler.SetCommand(player, attack);
     }
     public double GetOffset()
     {
@@ -42,7 +42,7 @@ public class BeatInput : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SetAttack(Attack.None);
+        SetCommand(Command.None);
         //chordWindow = timePerBeat;
         lastInput = new InputEvent(InputType.None, AudioSettings.dspTime);
 
@@ -57,21 +57,21 @@ public class BeatInput : MonoBehaviour
         double offset = curTime - lastInput.time;
         SetOffset(offset);
         // audioSource.PlayOneShot(sound);
-        if (GetAttack() == Attack.None)
+        if (GetCommand() == Command.None)
         {
             switch (lastInput.input)
             {
                 case InputType.Down:
-                    SetAttack(Attack.Down);
+                    SetCommand(Command.Down);
                     break;
                 case InputType.Up:
-                    SetAttack(Attack.Up);
+                    SetCommand(Command.Up);
                     break;
                 case InputType.Left:
-                    SetAttack(Attack.Left);
+                    SetCommand(Command.Left);
                     break;
                 case InputType.Right:
-                    SetAttack(Attack.Right);
+                    SetCommand(Command.Right);
                     break;
                 default:
                     break;
@@ -81,7 +81,7 @@ public class BeatInput : MonoBehaviour
         // Print out the attack
         //Debug.Log(attack);
         //lastInput.timeUntilBeat += inputLatency;
-        if (GetAttack() == Attack.None)
+        if (GetCommand() == Command.None)
         {
             GetComponent<TextMesh>().text = "";
         }
@@ -107,7 +107,7 @@ public class BeatInput : MonoBehaviour
         //beatAccum += ((AudioSettings.dspTime)- last);
         //last = (AudioSettings.dspTime);
         // If attack has been determined, don't bother checking inputs
-        if (GetAttack() == Attack.None)
+        if (GetCommand() == Command.None)
         {
             // Check inputs
             bool up = Input.GetButtonDown(upButton);
@@ -148,67 +148,67 @@ public class BeatInput : MonoBehaviour
             {
                 if(left)
                 {
-                    SetAttack(Attack.UpLeft);
+                    SetCommand(Command.UpLeft);
                 }
                 else if(right)
                 {
-                    SetAttack(Attack.UpRight);
+                    SetCommand(Command.UpRight);
                 }
                 else if(down)
                 {
-                    SetAttack(Attack.UpDown);
+                    SetCommand(Command.UpDown);
                 }
             }
             else if (lastInput.input == InputType.Down)
             {
                 if (left)
                 {
-                    SetAttack(Attack.DownLeft);
+                    SetCommand(Command.DownLeft);
                 }
                 else if (right)
                 {
-                    SetAttack(Attack.DownRight);
+                    SetCommand(Command.DownRight);
                 }
                 else if (down)
                 {
-                    SetAttack(Attack.UpDown);
+                    SetCommand(Command.UpDown);
                 }
             }
             else if (lastInput.input == InputType.Left)
             {
                 if (up)
                 {
-                    SetAttack(Attack.UpLeft);
+                    SetCommand(Command.UpLeft);
                 }
                 else if (right)
                 {
-                    SetAttack(Attack.LeftRight);
+                    SetCommand(Command.LeftRight);
                 }
                 else if (down)
                 {
-                    SetAttack(Attack.DownLeft);
+                    SetCommand(Command.DownLeft);
                 }
             }
             else if (lastInput.input == InputType.Right)
             {
                 if (up)
                 {
-                    SetAttack(Attack.UpRight);
+                    SetCommand(Command.UpRight);
                 }
                 else if (left)
                 {
-                    SetAttack(Attack.LeftRight);
+                    SetCommand(Command.LeftRight);
                 }
                 else if (down)
                 {
-                    SetAttack(Attack.DownRight);
+                    SetCommand(Command.DownRight);
                 }
             }
         }
 
     }
 
-    public enum Attack
+    public enum Command
     {
         None,
         Up,
@@ -267,31 +267,31 @@ public class BeatInput : MonoBehaviour
         }
     }
 
-    public static string AttackToArrows(Attack attack)
+    public static string CommandToArrows(Command command)
     {
-        switch(attack)
+        switch(command)
         {
-            case Attack.None:
+            case Command.None:
                 return "    ";
-            case Attack.Up:
+            case Command.Up:
                 return " ^  ";
-            case Attack.Left:
+            case Command.Left:
                 return "<   ";
-            case Attack.Right:
+            case Command.Right:
                 return "   >";
-            case Attack.Down:
+            case Command.Down:
                 return "  v ";
-            case Attack.UpLeft:
+            case Command.UpLeft:
                 return "<^  ";
-            case Attack.UpRight:
+            case Command.UpRight:
                 return " ^ >";
-            case Attack.LeftRight:
+            case Command.LeftRight:
                 return "<  >";
-            case Attack.UpDown:
+            case Command.UpDown:
                 return " ^v ";
-            case Attack.DownLeft:
+            case Command.DownLeft:
                 return "< v ";
-            case Attack.DownRight:
+            case Command.DownRight:
                 return "  v>";
             default:
                 return "    ";

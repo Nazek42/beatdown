@@ -4,26 +4,29 @@ using UnityEngine;
 
 public class AttackHandler : MonoBehaviour
 {
-    public BeatInput.Attack p1Attack;
-    public BeatInput.Attack p2Attack;
+    public BeatInput.Command p1Command;
+    public BeatInput.Command p2Command;
     public double p1Offset;
     public double p2Offset;
     public AudioPlayer player;
 
+    public Player leftPlayer;
+    public Player rightPlayer;
+    public FightController fightController;
+
     private bool p1Ready;
     private bool p2Ready;
-
-    private int p1Score = 0;
-    private int p2Score = 0;
 
     private List<NoteType> p1Notes;
     private List<NoteType> p2Notes;
 
+    public int maxSync = 8;
+
     // Start is called before the first frame update
     void Start()
     {
-        p1Attack = BeatInput.Attack.None;
-        p2Attack = BeatInput.Attack.None;
+        p1Command = BeatInput.Command.None;
+        p2Command = BeatInput.Command.None;
         p1Ready = false;
         p2Ready = false;
         p1Offset = 0.0;
@@ -87,8 +90,8 @@ public class AttackHandler : MonoBehaviour
         }
         string p2Actual = new string(p2ActualC);
 
-        string p1Attempted = BeatInput.AttackToArrows(p1Attack);
-        string p2Attempted = BeatInput.AttackToArrows(p2Attack);
+        string p1Attempted = BeatInput.CommandToArrows(p1Command);
+        string p2Attempted = BeatInput.CommandToArrows(p2Command);
 
         string p1Message;
         if (p1Actual == "    ")
@@ -98,7 +101,10 @@ public class AttackHandler : MonoBehaviour
         else if (p1Attempted == p1Actual)
         {
             p1Message = "HIT";
-            p1Score += 1;
+            if(leftPlayer.combo_points < maxSync)
+            {
+                leftPlayer.combo_points += 1;
+            }
         }
         else
         {
@@ -112,31 +118,39 @@ public class AttackHandler : MonoBehaviour
         else if (p2Attempted == p2Actual)
         {
             p2Message = "HIT";
-            p2Score += 1;
+            if (rightPlayer.combo_points < maxSync)
+            {
+                rightPlayer.combo_points += 1;
+            }
         }
         else
         {
             p2Message = "MISS";
         }
 
+
         // GetComponent<TextMesh>().text = p1Attempted + p2Attempted + "\n" + p1Actual + p2Actual + "\n" + Mathf.Round(1000F*(float)p1Offset).ToString() + " " + Mathf.Round(1000F * (float)p2Offset).ToString();
-        GetComponent<TextMesh>().text = p1Message + "   " + p2Message + "\n" + p1Score + "    " + p2Score ;
+        GetComponent<TextMesh>().text = p1Message + "   " + p2Message + "\n" + leftPlayer.combo_points + "    " + rightPlayer.combo_points;
         GetComponent<TextMesh>().text.Replace("\n", "\\n");
 
-        p1Attack = BeatInput.Attack.None;
-        p2Attack = BeatInput.Attack.None;
+        leftPlayer.DetermineAction(p1Command);
+        rightPlayer.DetermineAction(p2Command);
+
+
+        p1Command = BeatInput.Command.None;
+        p2Command = BeatInput.Command.None;
         p1Notes.Clear();
         p2Notes.Clear();
         
     }
-    public void BeatReady(Player player)
+    public void BeatReady(PlayerNum player)
     {
         switch (player)
         {
-            case Player.Player1:
+            case PlayerNum.Player1:
                 p1Ready = true;
                 break;
-            case Player.Player2:
+            case PlayerNum.Player2:
                 p2Ready = true;
                 break;
         }
@@ -148,68 +162,68 @@ public class AttackHandler : MonoBehaviour
         }
     }
 
-    public BeatInput.Attack GetAttack(Player player)
+    public BeatInput.Command GetCommand(PlayerNum player)
     {
         switch (player)
         {
-            case Player.Player1:
-                return p1Attack;
-            case Player.Player2:
-                return p2Attack;
+            case PlayerNum.Player1:
+                return p1Command;
+            case PlayerNum.Player2:
+                return p2Command;
         }
-        return p1Attack;
+        return p1Command;
     }
 
-    public void SetAttack(Player player, BeatInput.Attack attack)
+    public void SetCommand(PlayerNum player, BeatInput.Command Command)
     {
         switch(player)
         {
-            case Player.Player1:
-                p1Attack = attack;
+            case PlayerNum.Player1:
+                p1Command = Command;
                 break;
-            case Player.Player2:
-                p2Attack = attack;
+            case PlayerNum.Player2:
+                p2Command = Command;
                 break;
         }
     }
-    public double GetOffset(Player player)
+    public double GetOffset(PlayerNum player)
     {
         switch (player)
         {
-            case Player.Player1:
+            case PlayerNum.Player1:
                 return p1Offset;
-            case Player.Player2:
+            case PlayerNum.Player2:
                 return p2Offset;
         }
         return p1Offset;
     }
-    public void SetOffset(Player player, double offset)
+    public void SetOffset(PlayerNum player, double offset)
     {
         switch (player)
         {
-            case Player.Player1:
+            case PlayerNum.Player1:
                 p1Offset = offset;
                 break;
-            case Player.Player2:
+            case PlayerNum.Player2:
                 p2Offset = offset;
                 break;
         }
     }
 
-    public void AddNote(Player player, NoteType noteType)
+    public void AddNote(PlayerNum player, NoteType noteType)
     {
         switch (player)
         {
-            case Player.Player1:
+            case PlayerNum.Player1:
                 p1Notes.Add(noteType);
                 break;
-            case Player.Player2:
+            case PlayerNum.Player2:
                 p2Notes.Add(noteType);
                 break;
         }
         
     }
-    public enum Player
+    public enum PlayerNum
     {
         Player1,
         Player2
