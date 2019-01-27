@@ -5,8 +5,9 @@ using UnityEngine;
 public class FightController : MonoBehaviour {
 
     // Player variables
-    private Player right_player;
-    private Player left_player;
+    public Player left_player;
+    public Player right_player;
+   
 
     // Scoring variables
     private short winner = 0;
@@ -49,7 +50,7 @@ public class FightController : MonoBehaviour {
     static private float combo_mult = 0.125f;
 
     // Function called every beat
-    void Beat()
+    void Beat(double b)
     {
         // Determine each player's move
         Player.Attack right_act = right_player.GetAction();
@@ -75,7 +76,6 @@ public class FightController : MonoBehaviour {
             left_dist = left_player.ModDistance(-2);
         else
             left_dist = left_player.ModDistance(-1);
-
         // Determine outcome based on each player's move
         // If players are not in melee range of each other, then they can only land projectile hits
         if (right_dist != 0 || left_dist != 0)
@@ -177,7 +177,6 @@ public class FightController : MonoBehaviour {
             left_damage = BaseDmgTable[(int)left_act] * (1.0f + left_player.GetComboPoints() * combo_mult);
 
         else left_damage = BaseDmgTable[(int)left_act];
-
         // Apply damage calculations
         left_player.ModHealth(-right_damage);
         right_player.ModHealth(-left_damage);
@@ -273,6 +272,8 @@ public class FightController : MonoBehaviour {
         // Sets orientation of players
         left_player.SetOrientation(true);
         right_player.SetOrientation(false);
+
+        GetComponent<AudioPlayer>().onBeat += Beat;
 	}
 	
 	// Update is called once per frame
