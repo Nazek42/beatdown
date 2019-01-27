@@ -16,10 +16,10 @@ public class Player : MonoBehaviour {
 
     // Amount of health for the player (the game ends when this reaches zero)
     public float health;
-    static private float max_health = 128.0f;
+    static public float max_health = 128.0f;
 
     public float block;
-    static private float max_block = 48.0f;
+    static public float max_block = 48.0f;
 
     // Orientation variable: designates the player as rightward facing or leftward facing
     // Left player <=> Right-facing

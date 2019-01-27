@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AttackHandler : MonoBehaviour
 {
@@ -22,6 +23,13 @@ public class AttackHandler : MonoBehaviour
 
     public int maxSync = 8;
 
+    public Slider p1HealthBar;
+    public Slider p2HealthBar;
+    public Slider p1ShieldBar;
+    public Slider p2ShieldBar;
+    public SuperMeter p1SuperBar;
+    public SuperMeter p2SuperBar;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -35,11 +43,15 @@ public class AttackHandler : MonoBehaviour
         p1Notes = new List<NoteType>();
         p2Notes = new List<NoteType>();
     }
-
     // Update is called once per frame
     void Update()
     {
-        
+        p1HealthBar.value = leftPlayer.health / Player.max_health;
+        p2HealthBar.value = rightPlayer.health / Player.max_health;
+        p1ShieldBar.value = leftPlayer.block / Player.max_block;
+        p2ShieldBar.value = rightPlayer.block / Player.max_block;
+        p1SuperBar.meterValue = leftPlayer.combo_points;
+        p2SuperBar.meterValue = rightPlayer.combo_points;
     }
     void Beat(double beatNum)
     {

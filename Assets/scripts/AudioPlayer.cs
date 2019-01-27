@@ -44,6 +44,8 @@ public class AudioPlayer : MonoBehaviour {
     public delegate void OnBeat(double beat);
     public OnBeat onBeat;
 
+    public Renderer bg_render;
+
     // Use this for initialization
     void Start()
     {
@@ -52,6 +54,15 @@ public class AudioPlayer : MonoBehaviour {
         string audio_path = "music/" + path + "/" + System.IO.Path.GetFileNameWithoutExtension(song.metadata["MUSIC"]);
         Debug.Log(audio_path);
         audio_source.clip = Resources.Load<AudioClip>(audio_path);
+
+        /*try
+        {
+            string bg_path = "music/" + path + "/" + System.IO.Path.GetFileNameWithoutExtension(song.metadata["BACKGROUND"]);
+            Debug.Log(bg_path);
+            bg_render.material.mainTexture = Resources.Load<Texture>(bg_path);
+        }
+        catch { }*/
+
         beatLerper = new BeatLerper(song.bpmEvents, song.offset);
         notes_iter = song.notes.OrderBy(note => note.beat);
         beatMultiplier = System.Math.Pow(2, beatMultiplierLog);

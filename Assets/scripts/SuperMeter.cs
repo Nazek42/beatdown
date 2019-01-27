@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class SuperMeter : MonoBehaviour
 {
     //Used to set the color of stuff if wanted
-    private Color myColor;
+    public Color myColor;
     
     public Color MyColor
     {
@@ -22,7 +22,7 @@ public class SuperMeter : MonoBehaviour
     }
 
     //Current value of the super meter
-    private int meterValue = 0;
+    public int meterValue = 0;
 
     public int MeterValue
     {
@@ -33,7 +33,7 @@ public class SuperMeter : MonoBehaviour
     }
 
     private int meterMax;
-    private int meterDiv;   //Hold the 8 part divitions of the meter
+    private int meterDiv = 1;   //Hold the 8 part divitions of the meter
 
     //Maximum value of the super meter
     public int MeterMax
@@ -60,11 +60,11 @@ public class SuperMeter : MonoBehaviour
     void Start()
     {
         //Fetch the Graphic from the GameObject
-        m_MyGraphic = GetComponent<Graphic>();
+        //m_MyGraphic = GetComponent<Graphic>();
         //Create a new Color that starts as red
-        MyColor = Color.white;
+        //MyColor = Color.white;
         //Change the Graphic Color to the new Color
-        m_MyGraphic.color = MyColor;
+        //m_MyGraphic.color = MyColor;
 
        pip_0.color = myColor;
 
@@ -79,7 +79,6 @@ public class SuperMeter : MonoBehaviour
         {
             pip_0.color = Color.white;
         }
-
         else
         {
             pip_0.color = Color.black;

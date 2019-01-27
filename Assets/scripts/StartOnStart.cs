@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class StartOnStart : MonoBehaviour
 {
-    private AudioPlayer player;
+    public AudioPlayer player;
 
     private void Start()
     {
