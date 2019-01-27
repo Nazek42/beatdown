@@ -13,7 +13,7 @@ public class NoteController : MonoBehaviour
     [SerializeField] private bool reversed;
     public double note_time;
 
-    private const double note_pre_time = 0.2;
+    private const double note_pre_time = 0.5;
 
     private AudioPlayer controller;
     private List<NoteData> notes;

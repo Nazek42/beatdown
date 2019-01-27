@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class FightController : MonoBehaviour {
+    private ParticleManager particler;
 
     // Player variables
     public Player left_player;
@@ -20,7 +21,7 @@ public class FightController : MonoBehaviour {
 /*0*/     { Outcome.Noop , Outcome.Noop , Outcome.Dodge, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Hit  , Outcome.Hit  , Outcome.Noop  },
 /*1*/     { Outcome.Noop , Outcome.Noop , Outcome.Dodge, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Hit  , Outcome.Noop  },
 /*2*/     { Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Hit  , Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Dodge },
-/*3*/     { Outcome.Block, Outcome.Block, Outcome.Dodge, Outcome.Clash, Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit   },
+/*3*/     { Outcome.Block, Outcome.Block, Outcome.Dodge, Outcome.Clash, Outcome.Hit  , Outcome.Hit, Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit   },
 /*4*/     { Outcome.Block, Outcome.Block, Outcome.Hit  , Outcome.Hit  , Outcome.Clash, Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit   },
 /*5*/     { Outcome.Block, Outcome.Block, Outcome.Dodge, Outcome.Block, Outcome.Block, Outcome.Clash, Outcome.Block, Outcome.Block, Outcome.Hit  , Outcome.Hit  , Outcome.Hit   },
 /*6*/     { Outcome.Block, Outcome.Hit  , Outcome.Dodge, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Clash, Outcome.Block, Outcome.Hit  , Outcome.Hit  , Outcome.Hit   },
@@ -167,14 +168,47 @@ public class FightController : MonoBehaviour {
         float right_damage;
 
         // Calculate right player damage
-        right_damage = CalculateAttack(right_player, right_act);
+        right_damage = CalculateAttack(right_player, right_act, left_player);
 
         // Calculate left player damage
-        left_damage = CalculateAttack(left_player, left_act);
+        left_damage = CalculateAttack(left_player, left_act, left_player);
 
         // Apply damage calculations
         left_player.ModHealth(-right_damage);
         right_player.ModHealth(-left_damage);
+
+        // Do particle effects
+        if (right_damage > 0)
+        {
+            if (right_act.IsHigh())
+            {
+                particler.SpawnEffectOnPlayer(right_damage >= 4 ? "heavy_high_hit" : "light_high_hit", left_player, right_player);
+            }
+            if (right_act.IsLow())
+            {
+                particler.SpawnEffectOnPlayer(right_damage >= 4 ? "heavy_low_hit" : "light_low_hit", left_player, right_player);
+            }
+            if (right_act.IsMid())
+            {
+                particler.SpawnEffectOnPlayer(right_damage >= 4 ? "heavy_mid_hit" : "light_mid_hit", left_player, right_player);
+            }
+        }
+
+        if (left_damage > 0)
+        {
+            if (left_act.IsHigh())
+            {
+                particler.SpawnEffectOnPlayer(left_damage >= 4 ? "heavy_high_hit" : "light_high_hit", right_player, left_player);
+            }                
+            if (left_act.IsLow())
+            {
+                particler.SpawnEffectOnPlayer(left_damage >= 4 ? "heavy_low_hit" : "light_low_hit", right_player, left_player);
+            }                
+            if (left_act.IsMid())
+            {
+                particler.SpawnEffectOnPlayer(left_damage >= 4 ? "heavy_mid_hit" : "light_mid_hit", right_player, left_player);
+            }
+        }
     }
 
     private void Clash(Player.Attack left_act, Player.Attack right_act)
@@ -194,6 +228,19 @@ public class FightController : MonoBehaviour {
                 left_player.ModHealth(-tide);
 
         }
+        
+        else
+        {
+            if (left_act.IsHigh() || right_act.IsHigh())
+                particler.SpawnEffectOnPlayer("high_clash", left_player, right_player);
+
+            if (left_act.IsLow() || right_act.IsLow())
+                particler.SpawnEffectOnPlayer("low_clash", left_player, right_player);
+
+            if (left_act.IsMid() || right_act.IsMid())
+                particler.SpawnEffectOnPlayer("mid_clash", left_player, right_player);
+        }
+        
 
         // If not projectiles, players neutralize each other's damage (noop)
     }
@@ -225,7 +272,7 @@ public class FightController : MonoBehaviour {
         
         float antag_dmg;
         // Calculate attacker damage
-        antag_dmg = CalculateAttack(attacker, atk);
+        antag_dmg = CalculateAttack(attacker, atk, blocker);
 
         // Take remaining block value after hit
         float remainder = block_val - antag_dmg;
@@ -244,15 +291,21 @@ public class FightController : MonoBehaviour {
     }
 
     // Utility functions
-    private static float CalculateAttack(Player attacker, Player.Attack action)
+    private float CalculateAttack(Player attacker, Player.Attack action, Player other)
     {
         float dmg;
         if (action == Player.Attack.Projectile || action == Player.Attack.Uppercut)
         {
             dmg = CalculateBoostedAttack(attacker, action);
-            if (action == Player.Attack.Projectile && attacker.GetBlock() == 0)
+            if (action == Player.Attack.Projectile)
             {
-                dmg = 0;
+                if (attacker.GetBlock() == 0)
+                {
+                    dmg = 0;
+                } else
+                {
+                    particler.SpawnEffectOnPlayer("beam", attacker, other);
+                }
             }
             else
             {
@@ -280,6 +333,8 @@ public class FightController : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
+        particler = GetComponent<ParticleManager>();
+
         // Sets orientation of players
         left_player.SetOrientation(true);
         right_player.SetOrientation(false);

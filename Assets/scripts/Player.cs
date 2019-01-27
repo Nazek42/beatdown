@@ -290,4 +290,23 @@ public class Player : MonoBehaviour {
         LowKick,
         Noop
     }
+    
+}
+
+public static class AttackExt
+{
+    public static bool IsHigh(this Player.Attack atk)
+    {
+        return atk == Player.Attack.Uppercut || atk == Player.Attack.HighPunch;
+    }
+
+    public static bool IsLow(this Player.Attack atk)
+    {
+        return atk == Player.Attack.LowKick;
+    }
+
+    public static bool IsMid(this Player.Attack atk)
+    {
+        return atk == Player.Attack.Jab || atk == Player.Attack.Projectile || atk == Player.Attack.BodyCheck || atk == Player.Attack.SpinKick;
+    }
 }
