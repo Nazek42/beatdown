@@ -5,19 +5,18 @@ using UnityEngine.UI;
 
 public class StartOnStart : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private AudioPlayer player;
+
+    private void Start()
     {
-        
+        player = GetComponent<AudioPlayer>();
     }
-    bool flag = false;
-    // Update is called once per frame
-    void Update()
+
+    private void Update()
     {
-        if (!flag)
+        if (player.ready && !player.playing)
         {
-            GetComponent<Button>().onClick.Invoke();
-            flag = true;
+            player.PlaySong();
         }
     }
 }

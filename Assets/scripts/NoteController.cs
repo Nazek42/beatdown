@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class NoteController : MonoBehaviour
 {
+    [SerializeField] private BoxCollider2D noteBox;
     [SerializeField] private LineRenderer topLine, bottomLine;
+    [SerializeField] private GameObject arrowHolder;
     [SerializeField] private Note note_prefab;
 
     [SerializeField] private bool reversed;
@@ -26,12 +28,26 @@ public class NoteController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Vector2 worldPos = noteBox.transform.position;
+        Vector2 bl = worldPos + noteBox.offset - noteBox.size / 2;
+        Vector2 tr = worldPos + noteBox.offset + noteBox.size / 2;
+
+        float note_size = arrowHolder.transform.Find("ArrowR").GetComponent<SpriteRenderer>().size.x;
+
+        topLine.SetPositions(   new[] { new Vector3(bl.x, tr.y), new Vector3(tr.x, tr.y) });
+        bottomLine.SetPositions(new[] { new Vector3(bl.x, bl.y), new Vector3(tr.x, bl.y) });
         float line_left = topLine.GetPosition(0).x;
         float line_right = topLine.GetPosition(1).x;
-        left_x = line_left + 1;
-        note_separation = (line_right - line_left) / 4;
-        start_y = bottomLine.GetPosition(0).y;
-        end_y = topLine.GetPosition(0).y;
+        left_x = bl.x + note_size;
+        note_separation = (tr.x - bl.x - 2*note_size) / 3;
+        start_y = bl.y;
+        end_y = tr.y;
+
+        // Set up the target arrows
+        arrowHolder.transform.Find("ArrowR").transform.position = new Vector2(GetNoteX(NoteType.right), end_y);
+        arrowHolder.transform.Find("ArrowU").transform.position = new Vector2(GetNoteX(NoteType.up), end_y);
+        arrowHolder.transform.Find("ArrowD").transform.position = new Vector2(GetNoteX(NoteType.down), end_y);
+        arrowHolder.transform.Find("ArrowL").transform.position = new Vector2(GetNoteX(NoteType.left), end_y);
     }
 
     public void Initialize(AudioPlayer controller_, IEnumerable<NoteData> notes_)
