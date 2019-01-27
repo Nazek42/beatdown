@@ -54,6 +54,7 @@ public class ParticleManager : MonoBehaviour
 
     public GameObject SpawnEffectOnPlayer(string effect_name, Player player, Player other)
     {
+        Debug.Log(effect_name);
         if (effect_name == "beam")
         {
             float start = player.right_facing ? 1f : -1f;
@@ -61,8 +62,10 @@ public class ParticleManager : MonoBehaviour
             float center = (start + end) / 2;
             float xscale = Mathf.Abs(end - start) * 20;
             CannedEffect can = new CannedEffect(Effect.Fireball, new Vector2(center, 0), new Vector2(xscale, 3) / player.transform.localScale);
+           
             return SpawnCannedOnPlayer(can, player, other);
         }
+       
         return SpawnCannedOnPlayer(vfxLibrary[effect_name], player, other);
     }
 
@@ -75,6 +78,7 @@ public class ParticleManager : MonoBehaviour
         obj.transform.localRotation = player.right_facing ? Quaternion.identity : Quaternion.Euler(0f, 0f, 180f);
         obj.transform.localScale = can.scale;
         activeEffects.Add(obj);
+
         return obj;
     }
 

@@ -46,6 +46,10 @@ public class AttackHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(leftPlayer.health <= 0 || rightPlayer.health <= 0)
+        {
+            player.Stop();
+        }
         p1HealthBar.value = leftPlayer.health / Player.max_health;
         p2HealthBar.value = rightPlayer.health / Player.max_health;
         p1ShieldBar.value = leftPlayer.block / Player.max_block;

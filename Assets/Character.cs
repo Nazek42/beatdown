@@ -13,6 +13,8 @@ public class Character : MonoBehaviour
         public Player.Attack attack;
         public Sprite sprite;
     }
+    public Sprite deathSprite;
+    private bool dead = false;
     public SpriteTableEntry[] spriteList;
 
     private Dictionary<Player.Attack, Sprite> spriteTable;
@@ -32,6 +34,15 @@ public class Character : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(player.health <= 0)
+        {
+            dead = true;
+            sprend.sprite = deathSprite;
+        }
+        if(dead)
+        {
+            return;
+        }
         float mult;
         if(player.right_facing)
         {

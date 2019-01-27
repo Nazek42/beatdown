@@ -20,7 +20,7 @@ public class NoteData
 }
 
 public class AudioPlayer : MonoBehaviour {
-    AudioSource audio_source;
+    public AudioSource audio_source;
 
     public string path;
     public string simfileName;
@@ -87,6 +87,12 @@ public class AudioPlayer : MonoBehaviour {
         song_start_time = (double) AudioSettings.dspTime;
         playing = true;
         Debug.Log("Playing!");
+    }
+
+    public void Stop()
+    {
+        audio_source.Stop();
+        playing = false;
     }
 
     // Update is called once per frame

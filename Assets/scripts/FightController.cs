@@ -48,7 +48,7 @@ public class FightController : MonoBehaviour {
     };
 
     // Combo point damage multiplier for uppercuts and projectiles
-    static private float combo_mult = 1f;
+    static private float combo_mult = 1.5f;
 
     // Function called every beat
     void Beat(double b)
@@ -305,11 +305,12 @@ public class FightController : MonoBehaviour {
                 } else
                 {
                     particler.SpawnEffectOnPlayer("beam", attacker, other);
+                    attacker.DrainCombos();
                 }
             }
             else
             {
-                attacker.DrainCombos();
+                //attacker.DrainCombos();
             }
         }
         else
