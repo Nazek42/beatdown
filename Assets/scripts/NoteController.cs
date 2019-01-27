@@ -23,7 +23,7 @@ public class NoteController : MonoBehaviour
     private readonly int[] distances = { 1, 3, 2, 0 };
 
     public AttackHandler attackHandler;
-    public AttackHandler.Player player;
+    public AttackHandler.PlayerNum player;
 
     // Start is called before the first frame update
     void Start()
@@ -88,7 +88,7 @@ public class NoteController : MonoBehaviour
     {   
         foreach (NoteData note in notes.Where(note => ShouldSpawnNote(note.beat)))
         {
-            Debug.Log(controller.beatMultiplier + " " + note.beat);
+            //Debug.Log(controller.beatMultiplier + " " + note.beat);
             Instantiate(note_prefab).Initialize(controller, this, note.beat, note.direction);
         }
         

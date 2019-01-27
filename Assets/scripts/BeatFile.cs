@@ -92,7 +92,7 @@ public class BeatFile {
             {
                 string line = measure[b];
                 //Debug.Log("Line of length " + line.Length + ": \"" + line + '"');
-                Debug.Log("Full measure: \"" + measure + '"');  
+                //Debug.Log("Full measure: \"" + measure + '"');  
                 for (int col = 0; col < line.Length; col++)
                 {
                     if (line[col] != '0')

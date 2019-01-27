@@ -48,7 +48,7 @@ public class Note : MonoBehaviour {
         double until = audioPlayer.beatLerper.TimeFromBeat(beat) - audioPlayer.SongTime();
         if (until < 0)
         {
-            Debug.Log("Note destroying self");
+            //Debug.Log("Note destroying self");
             Destroy(gameObject);
             return;
         }

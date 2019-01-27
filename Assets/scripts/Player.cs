@@ -5,29 +5,31 @@ using UnityEngine;
 public class Player : MonoBehaviour {
 
     // Distance of player from central meeting point
-    private short distance_from_center;
+    public short distance_from_center;
 
     // Number of key moves hit consecutively
-    private short combo_points;
+    public short combo_points;
 
     // Timing notes
-    private bool sync;      // Did the player match with a subset of the notes on the last beat?
-    private short timing;   // How well did the play match his or her move with the beat?
+    public bool sync;      // Did the player match with a subset of the notes on the last beat?
+    public short timing;   // How well did the play match his or her move with the beat?
 
     // Amount of health for the player (the game ends when this reaches zero)
-    private float health;
+    public float health;
     static private float max_health = 128.0f;
 
-    private float block;
+    public float block;
     static private float max_block = 48.0f;
 
     // Orientation variable: designates the player as rightward facing or leftward facing
     // Left player <=> Right-facing
     // Right player <=> Left-facing
-    private bool right_facing;
+    public bool right_facing;
 
     // Stores player's action decision
-    private Attack action;
+    public Attack action;
+
+    
 
     // Get action state of player
     public Attack GetAction()
@@ -35,68 +37,68 @@ public class Player : MonoBehaviour {
         return action;
     }
 
-    // Takes a keyboard/DDR pad command and converts it into the appropriate move
+    // Takes a keyboard/DDR pad BeatInput.Command and converts it into the appropriate move
     // for the player
-    public Attack DetermineAction(Command comm_code)
+    public Attack DetermineAction(BeatInput.Command comm_code)
     {
         switch(comm_code)
         {
-            case (Command.None):
+            case (BeatInput.Command.None):
                 action = Attack.Noop;       // Both players
                 break;
 
-            case (Command.Up):
+            case (BeatInput.Command.Up):
                 action = Attack.HighBlock;  // Both players
                 break;
 
-            case (Command.Left):
+            case (BeatInput.Command.Right):
 
                 if (right_facing) action = Attack.Jab;  // Left player
                 else action = Attack.Backdash;          // Right player
 
                 break;
 
-            case (Command.Right):
+            case (BeatInput.Command.Left):
 
                 if (right_facing) action = Attack.Backdash;  // Left player
                 else action = Attack.Jab;                    // Right player
 
                 break;
 
-            case (Command.Down):
+            case (BeatInput.Command.Down):
                 action = Attack.LowBlock;   // Both players
                 break;
 
-            case (Command.UpLeft):
+            case (BeatInput.Command.UpLeft):
 
                 if (right_facing) action = Attack.Uppercut;  // Left player
                 else action = Attack.HighPunch;              // Right player
 
                 break;
 
-            case (Command.UpRight):
+            case (BeatInput.Command.UpRight):
 
                 if (right_facing) action = Attack.HighPunch;  // Left player
                 else action = Attack.Uppercut;                // Right player
 
                 break;
 
-            case (Command.LeftRight):
+            case (BeatInput.Command.LeftRight):
                 action = Attack.BodyCheck;  // Both players
                 break;
 
-            case (Command.UpDown):
+            case (BeatInput.Command.UpDown):
                 action = Attack.Projectile; // Both players
                 break;
 
-            case (Command.DownLeft):
+            case (BeatInput.Command.DownLeft):
 
                 if (right_facing) action = Attack.SpinKick;  // Left player
                 else action = Attack.LowKick;                // Right player
 
                 break;
 
-            case (Command.DownRight):
+            case (BeatInput.Command.DownRight):
 
                 if (right_facing) action = Attack.LowKick;  // Left player
                 else action = Attack.SpinKick;              // Right player
@@ -124,7 +126,7 @@ public class Player : MonoBehaviour {
         else
             distance_from_center += mod;
 
-        return mod;
+        return distance_from_center;
     }
 
     // Modifies the number of combo points the player has
@@ -219,8 +221,8 @@ public class Player : MonoBehaviour {
         return timing;
     }
 
-    // Checks whether the player input a command which is a subset of the arrows on the beat
-    public bool CheckSync(Player.Command input, Player.Command[] synced_moves)
+    // Checks whether the player input a BeatInput.Command which is a subset of the arrows on the beat
+    public bool CheckSync(BeatInput.Command input, BeatInput.Command[] synced_moves)
     {
         sync = false;
 
@@ -279,21 +281,5 @@ public class Player : MonoBehaviour {
         SpinKick,
         LowKick,
         Noop
-    }
-
-    // Enum for action types
-    public enum Command
-    {
-        None,
-        Up,
-        Left,
-        Right,
-        Down,
-        UpLeft,
-        UpRight,
-        LeftRight,
-        UpDown,
-        DownLeft,
-        DownRight
     }
 }
