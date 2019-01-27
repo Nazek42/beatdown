@@ -18,7 +18,7 @@ public class FightController : MonoBehaviour {
     static private Outcome[,] InRangeOutcomes = new Outcome[11,11]
     {          /*0*/          /*1*/          /*2*/          /*3*/          /*4*/          /*5*/          /*6*/          /*7*/          /*8*/          /*9*/          /*10*/
 /*0*/     { Outcome.Noop , Outcome.Noop , Outcome.Dodge, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Hit  , Outcome.Hit  , Outcome.Noop  },
-/*1*/     { Outcome.Noop , Outcome.Noop , Outcome.Dodge, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Hit  , Outcome.Hit  , Outcome.Noop  },
+/*1*/     { Outcome.Noop , Outcome.Noop , Outcome.Dodge, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Block, Outcome.Hit  , Outcome.Noop  },
 /*2*/     { Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Hit  , Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Dodge, Outcome.Dodge },
 /*3*/     { Outcome.Block, Outcome.Block, Outcome.Dodge, Outcome.Clash, Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit   },
 /*4*/     { Outcome.Block, Outcome.Block, Outcome.Hit  , Outcome.Hit  , Outcome.Clash, Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit  , Outcome.Hit   },
@@ -38,11 +38,11 @@ public class FightController : MonoBehaviour {
         0.0f,       /* Backdash */
         2.0f,       /* Jab */
         0.0f,       /* Projectile */
-        2.0f,       /* Body Check */
-        4.0f,       /* Uppercut */
+        3.0f,       /* Body Check */
+        3.0f,       /* Uppercut */
         4.0f,       /* High Punch */
-        4.0f,       /* Spin Kick */
-        2.0f,       /* Back Kick */
+        5.0f,       /* Spin Kick */
+        3.5f,       /* Low Kick */
         0.0f        /* Noop */
     };
 
@@ -263,7 +263,12 @@ public class FightController : MonoBehaviour {
         {
             dmg = BaseDmgTable[(int)action];
         }
-        
+
+        if (action == attacker.prev_action)
+        {
+            dmg *= 0.5f;
+        }
+
         return dmg;
     }
 

@@ -28,6 +28,7 @@ public class Player : MonoBehaviour {
 
     // Stores player's action decision
     public Attack action;
+    public Attack prev_action;
 
     
 
@@ -41,6 +42,7 @@ public class Player : MonoBehaviour {
     // for the player
     public Attack DetermineAction(BeatInput.Command comm_code)
     {
+        prev_action = action;
         switch(comm_code)
         {
             case (BeatInput.Command.None):
