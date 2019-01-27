@@ -54,7 +54,7 @@ public class Note : MonoBehaviour {
             return;
         }
 
-        renderer.color = new Color(renderer.color.r, renderer.color.g, renderer.color.b, (float)(1.0 - until));
+        //renderer.color = new Color(renderer.color.r, renderer.color.g, renderer.color.b, (float)(1.0 - until));
 
         transform.position = Vector2.Lerp(noteController.GetStartPos(type), noteController.GetEndPos(type), (float)(1 - until / noteController.note_time));
         if (!renderer.enabled && until <= noteController.note_time)
