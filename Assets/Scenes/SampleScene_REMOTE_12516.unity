@@ -2766,8 +2766,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audio_source: {fileID: 0}
-  path: Brain Power
-  simfileName: Brain Power.sm
+  path: Escape from the city
+  simfileName: City Escape.sm
   beatMultiplierLog: 0
   boards:
   - {fileID: 1357603639}
