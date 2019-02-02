@@ -304,13 +304,13 @@ public class FightController : MonoBehaviour {
                     dmg = 0;
                 } else
                 {
-                    particler.SpawnEffectOnPlayer("beam", attacker, other);
+                    //particler.SpawnEffectOnPlayer("beam", attacker, other);
                     attacker.DrainCombos();
                 }
             }
             else
             {
-                //attacker.DrainCombos();
+                attacker.DrainCombos();
             }
         }
         else
